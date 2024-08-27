@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>帖子展示</title>
+    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .carousel-container {
+            width: 100%;
+            height: 100vh;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .swiper-container {
+            width: 100%;
+            height: 100%;
+        }
+
+        .swiper-slide {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .swiper-slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .swiper-button-next, .swiper-button-prev {
+            position: absolute;
+            top: 40%; 
+            transform: translateY(-50%);
+            width: 30px;
+            height: 30px;
+            background: rgba(0, 0, 0, 0.5);
+            color: #fff;
+            border-radius: 50%;
+            z-index: 10;
+        }
+        .swiper-button-next {
+            right: 10px;
+        }
+        .swiper-button-prev {
+            left: 10px;
+        }
+        .post-container {
+            width: 70%;
+        }
+        .post-box {
+            background-color: #ffffff;
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .user-avatar {
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            margin-right: 15px;
+        }
+        .user-name {
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #333;
+        }
+        .post-content {
+            font-size: 1em;
+            line-height: 1.6em;
+            color: #555;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+        .post-time, .post-location {
+            color: #888;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        .post-location {
+            margin-top: 2px;
+        }
+        .post-images {
+            display: flex;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        .post-images img {
+            width: 200px;
+            height: 200px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            object-fit: cover;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+        }
+        .comment-section {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            align-items: center;
+        }
+        .comment-section .comment-input {
+            width: 60%;
+        }
+        .comment-section .comment-input input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        .comment-section .comment-buttons {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+        .comment-section .comment-buttons button {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #080909;
+            color: white;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .comment-popup {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 400px;
+            height: 100%;
+            background-color: white;
+            box-shadow: -2px 0 5px rgba(0, 0, 0, 0.3);
+            transition: right 0.3s ease-in-out;
+            overflow-y: auto;
+            padding: 20px;
+            z-index: 1000;
+            display: none;
+        }
+        .comment-popup.active {
+            display: block;
+        }
+        .comment-popup h4 {
+            margin-bottom: 15px;
+        }
+        .comment-popup .comment-box {
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        .comment-popup .comment-box img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        .comment-popup .comment-box .comment-content {
+            margin-left: 50px;
+        }
+        .comment-popup .comment-box .delete-comment {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            color: rgb(8, 8, 8);
+            cursor: pointer;
+            font-size: 0.8em;
+        }
+        .comment-popup .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+            font-size: 1.5em;
+            color: #888;
+        }
+        .fab {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 45px;
+            height: 45px;
+            background-color: #090a0b;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            text-decoration: none;
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            text-align: center;
+        }
+        .fab-button {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            padding: 10px 20px;
+            background-color: #080908;
+            color: white;
+            border-radius: 25px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            text-decoration: none;
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .back{
+            font-size: 16px;
+            color: rgb(244, 240, 240);
+            cursor: pointer;
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            z-index: 1000;
+        }
+        .like-btn {
+            font-size: 1.5em;
+            color: #888;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+
+        .like-btn.liked {
+            color: #e74c3c;
+        }
+
+        .like-btn i {
+            margin-right: 5px;
+        }
+        .star-button {
+            background-color: transparent;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        .star-button:focus,
+        button:focus {
+            outline: none;
+        }
+        .header-user-info {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            z-index: 100; /* 确保头像和姓名在页面最前面 */
+            background-color: transparent;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+
+        .header-user-info img {
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            margin-right: 10px;
+            object-fit: cover;
+        }
+
+        .header-user-info span {
+            font-weight: bold;
+            color: white; /* 白色字体在深色背景上更清晰 */
+        }
+
+    </style>
+</head>
+<body>
+     <!-- 用户头像和姓名 -->
+     <div class="header-user-info" onclick="redirectToUserPage()">
+        <img id="headerUserAvatar" src="default-avatar.png" alt="用户头像">
+        <span id="headerUserName">用户名</span>
+    </div>
+
+    <!-- 轮播图片区域 -->
+    <div class="carousel-container">
+        <div class="swiper-container">
+            <div class="swiper-wrapper">
+                <div class="swiper-slide"><img src="image/post background/riize1.jpg" alt="图片1"></div>
+            <!-- 可以添加更多的图片 -->
+            <div class="swiper-slide">
+                <img src="image/post background/riize2.jpg" alt="图片2">
+            </div>
+            <div class="swiper-slide">
+                <img src="image/post background/riize3.jpg" alt="图片3">
+            </div>
+            </div>
+            <!-- 手动轮播的导航箭头 -->
+            <div class="swiper-button-next"></div>
+            <div class="swiper-button-prev"></div>
+        </div>
+    </div>
+
+<!-- 帖子内容区域 -->
+<div class="post-container" id="posts-container"></div>
+
+<!-- 评论弹出窗口 -->
+<div class="comment-popup" id="commentPopup">
+    <span class="close-btn" id="closePopup">&times;</span>
+    <h4>评论</h4>
+    <div id="commentList"></div>
+</div>
+
+<!-- 双击放大图片 -->
+<div id="fullscreenOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.8); justify-content: center; align-items: center; z-index: 1000;">
+    <img id="fullscreenImage" src="" alt="放大图片" style="max-width: 90%; max-height: 90%;">
+</div>
+
+<!-- 返回 -->
+<div class="back" onclick="goBack()">&lt; BACK</div>
+
+<!-- 新建帖子圆形图标 -->
+<a href="发布帖子10-2.html" class="fab">+</a>
+
+<!-- 打卡点列表按钮 -->
+<a href="checkpoint.html" class="fab-button">打卡点列表</a>
+
+<script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+<script>
+    //返回
+    function goBack() {
+        window.location.href = 'index.html';
+    }
+    //用户头像及姓名
+    document.addEventListener('DOMContentLoaded', function() {
+            const currentUser = JSON.parse(localStorage.getItem('user'));
+            if (currentUser) {
+                document.getElementById('headerUserAvatar').src = currentUser.profile_photo || 'default-avatar.png';
+                document.getElementById('headerUserName').textContent = currentUser.user_name || '用户名';
+            } else {
+                alert('用户未登录，请先登录');
+                window.location.href = 'login.html';
+            }
+        });
+
+        function redirectToUserPage() {
+            window.location.href = 'home.html'; // 替换为目标页面的URL
+        }
+
+       // 从localStorage中获取用户信息
+       let currentUser = null;
+    document.addEventListener('DOMContentLoaded', function() {
+        currentUser = JSON.parse(localStorage.getItem('user'));
+        if (!currentUser) {
+            alert('用户未登录，请先登录');
+            window.location.href = 'login.html'; // 重定向到登录页面
+        } else {
+            console.log('当前用户:', currentUser);
+            Promise.all([
+    fetchUserFavorites(currentUser.user_id),
+    fetchUserlike(currentUser.user_id)
+])
+
+    .catch(error => console.error('获取用户数据失败:', error));
+
+               
+        }
+    });
+     //用户点赞帖子
+     function fetchUserlike(userId) {
+        fetch(`http://localhost:4000/post_like/${userId}`)
+        .then(response => response.json())
+        .then(data => {
+            currentUser.likes = data.likes || []; // 假设后端返回的数据结构包含 favorites
+           
+        })
+        .catch(error => console.error('获取用户点赞信息失败:', error));
+    }
+
+     //用户收藏帖子
+     function fetchUserFavorites(userId) {
+        fetch(`http://localhost:4000/post_favorites/${userId}`)
+        .then(response => response.json())
+        .then(data => {
+            currentUser.favorite = data.favorite || []; // 假设后端返回的数据结构包含 favorites
+           
+        })
+        .catch(error => console.error('获取用户收藏信息失败:', error));
+    }
+
+    
+    document.addEventListener('DOMContentLoaded', function () {
+        const user = JSON.parse(localStorage.getItem('user'));
+        const userId = user ? user.user_id : null;
+
+        //轮播图
+        const swiper = new Swiper('.swiper-container', {
+            loop: true,
+            autoplay: {
+                delay: 10000,
+                disableOnInteraction: false,
+            },
+            navigation: {
+                nextEl: '.swiper-button-next',
+                prevEl: '.swiper-button-prev',
+            },
+            pagination: {
+                el: null,
+            },
+        });
+
+        // 获取帖子数据
+        fetch('http://localhost:4000/api/posts')
+            .then(response => response.json())
+            .then(data => {
+                const postsContainer = document.getElementById('posts-container');
+                data.forEach(post => {
+                    const postBox = document.createElement('div');
+                    postBox.className = 'post-box';
+                    postBox.setAttribute('data-checkpoint-id', post.checkpoint_id); 
+
+                    const userInfo = document.createElement('div');
+                    userInfo.className = 'user-info';
+                    userInfo.innerHTML = `
+                        <img class="user-avatar" src="${post.profile_photo}" alt="${post.user_name}的头像">
+                        <div class="user-name">${post.user_name}</div>
+                    `;
+                    postBox.appendChild(userInfo);
+
+                    const postTime = document.createElement('div');
+                    postTime.className = 'post-time';
+                    postTime.textContent = `${post.publish_time}`;
+                    postBox.appendChild(postTime);
+
+                    const postLocation = document.createElement('div');
+                    postLocation.className = 'post-location';
+                    postLocation.textContent = `${post.location}`;
+                    postBox.appendChild(postLocation);
+
+                    const postContent = document.createElement('div');
+                    postContent.className = 'post-content';
+                    postContent.textContent = `${post.content}`;
+                    postBox.appendChild(postContent);
+
+                    if (post.images && post.images.length > 0) {
+                        const postImages = document.createElement('div');
+                        postImages.className = 'post-images';
+                        post.images.forEach(imageUrl => {
+                            const img = document.createElement('img');
+                            img.src = imageUrl;
+                            img.alt = "帖子图片";
+                            img.ondblclick = function () {
+                                showFullscreenImage(imageUrl);
+                            };
+                            postImages.appendChild(img);
+                        });
+                        postBox.appendChild(postImages);
+                    }
+
+                    const commentSection = document.createElement('div');
+                    commentSection.className = 'comment-section';
+
+                    // 评论输入框和按钮
+                    const commentInput = document.createElement('div');
+                    commentInput.className = 'comment-input';
+                    commentInput.innerHTML = `
+                        <input type="text" placeholder="添加评论...">
+                    `;
+                    commentSection.appendChild(commentInput);
+
+                     // 判断当前用户是否已点赞刺帖子
+                    const islike = currentUser && currentUser.likes && currentUser.likes.includes(post.post_id);
+                    // 如果已点赞，则图标为实心；否则为空心
+                    const heartClass = islike ? 'fas fa-heart' : 'far fa-heart';
+
+                    // 判断当前用户是否已收藏此帖子
+                    const isFavorite = currentUser && currentUser.favorite && currentUser.favorite.includes(post.post_id);
+                    // 如果已收藏，则星星图标为实心；否则为空心
+                    const starClass = isFavorite ? 'fas' : 'far';
+                     
+                    // 评论、收藏、点赞按钮
+                    const commentButtons = document.createElement('div');
+                    commentButtons.className = 'comment-buttons';
+                    commentButtons.innerHTML = `
+                        <button class="comment-submit">发表</button>
+                        <button class="view-comments">查看评论</button>
+                        <button class="like-btn ${post.is_liked ? 'liked' : ''}" data-post-id="${post.post_id}">
+                            <i class="${heartClass} fa-heart" ></i> ${post.likes_count || 0}</button>
+                        <button class="star-button" onclick="toggleFavorite(${post.post_id},${post.checkpoint_id},this)"> 
+                            <i class="${starClass} fa-star"></i>
+                        </button>
+                    `;
+                    commentSection.appendChild(commentButtons);
+                    postBox.appendChild(commentSection);
+                    postsContainer.appendChild(postBox);
+
+                    // 点赞功能独立绑定
+                    const likeBtn = commentButtons.querySelector('.like-btn');
+                    likeBtn.addEventListener('click', function () {
+                        const postId = this.getAttribute('data-post-id');
+
+                        if (userId) {
+                            fetch('http://localhost:4000/api/posts/like', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({ user_id: userId, post_id: postId})
+                            }).then(response => response.json())
+                                .then(data => {
+                                    if (data.success) {
+                                        this.classList.add('liked');
+                                        const likeIcon = this.querySelector('i');
+                                        likeIcon.classList.remove('far');
+                                        likeIcon.classList.add('fas');
+                                        this.style.color = '#e74c3c';
+                                        this.innerHTML = `<i class="fas fa-heart"></i> ${data.likes_count}`; // 更新点赞数
+                                    } else {
+                                        alert(data.message);
+                                    }
+                                }).catch(error => console.error('点赞失败:', error));
+                        } else {
+                            alert('请先登录。');
+                        }
+                    });
+
+                    // 提交评论和查看评论事件处理代码
+                    commentButtons.querySelector('.comment-submit').addEventListener('click', function () {
+                        const commentContent = commentInput.querySelector('input').value;
+                        if (commentContent && userId) {
+                            fetch('http://localhost:4000/api/comments', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    post_id: post.post_id,
+                                    user_id: userId,
+                                    comment_content: commentContent
+                                })
+                            }).then(response => response.json())
+                                .then(data => {
+                                    if (data.success) {
+                                        commentInput.querySelector('input').value = '';
+                                        alert('评论发表成功！');
+                                    }
+                                }).catch(error => console.error('提交评论失败:', error));
+                        } else {
+                            alert('请先登录并输入评论内容。');
+                        }
+                    });
+
+                    // 查看评论
+                    commentButtons.querySelector('.view-comments').addEventListener('click', function () {
+                        const commentPopup = document.getElementById('commentPopup');
+                        const commentList = document.getElementById('commentList');
+                        commentList.innerHTML = '';
+
+                        fetch('http://localhost:4000/api/user')
+                            .then(response => response.json())
+                            .then(users => {
+                                post.comments.forEach(comment => {
+                                    const user = users.find(u => u.user_id === comment.user_id);
+                                    const commentBox = document.createElement('div');
+                                    commentBox.className = 'comment-box';
+                                    commentBox.innerHTML = `
+                                        <img src="${user.profile_photo}" alt="${user.user_name}的头像">
+                                        <div class="comment-content">
+                                            <strong>${user.user_name}</strong><br>
+                                            ${comment.comment_content}
+                                            ${comment.user_id === userId ? `<span class="delete-comment">删除</span>` : ''}
+                                        </div>
+                                    `;
+                                    commentList.appendChild(commentBox);
+
+                                    if (comment.user_id === userId) {
+                                        commentBox.querySelector('.delete-comment').addEventListener('click', function () {
+                                            if (confirm('确定要删除这条评论吗？')) {
+                                                fetch(`http://localhost:4000/api/comments/${comment.user_post_id}`, {
+                                                    method: 'DELETE',
+                                                    headers: {
+                                                        'Content-Type': 'application/json'
+                                                    },
+                                                    body: JSON.stringify({ user_id: userId })
+                                                }).then(response => response.json())
+                                                    .then(data => {
+                                                        if (data.success) {
+                                                            commentBox.remove();
+                                                        } else {
+                                                            alert('删除失败');
+                                                        }
+                                                    }).catch(error => console.error('删除评论失败:', error));
+                                            }
+                                        });
+                                    }
+                                });
+
+                                commentPopup.classList.add('active');
+                                commentPopup.style.right = '0';
+                            });
+                    });
+                });
+            })
+            .catch(error => console.error('获取数据失败:', error));
+
+        // 关闭评论弹出层
+        document.getElementById('closePopup').addEventListener('click', function () {
+            const commentPopup = document.getElementById('commentPopup');
+            commentPopup.style.right = '-400px';
+            setTimeout(() => {
+                commentPopup.classList.remove('active');
+            }, 300);
+        });
+    });
+
+    
+    //收藏
+    function toggleFavorite(postID,checkpointId,starButton) {
+        console.log('postID:', postID); // 打印postID
+        console.log('checkpointId:', checkpointId); // 打印checkpointId
+
+        if (!checkpointId) {
+        alert('Checkpoint ID 未定义，请检查数据传递');
+        return;
+    }
+        if (!currentUser) {
+            alert('请先登录');
+            return;
+        }
+
+        const data = {
+            user_id: currentUser.user_id,
+            post_id:postID,
+            checkpoint_id:checkpointId
+           };
+
+        fetch('http://localhost:4000/post_favorite', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.code === 1) {
+            starButton.querySelector('i').classList.remove('far');
+            starButton.querySelector('i').classList.add('fas');
+            alert('收藏成功');
+        } else if (result.code === 2) {
+            starButton.querySelector('i').classList.remove('fas');
+            starButton.querySelector('i').classList.add('far');
+                alert('已取消收藏');
+            }
+        })
+        .catch(error => {
+            console.error('收藏请求失败:', error);
+            alert('收藏请求失败');
+        });
+    }
+    
+    function showFullscreenImage(imageUrl) {
+        const overlay = document.getElementById('fullscreenOverlay');
+        const fullscreenImage = document.getElementById('fullscreenImage');
+        fullscreenImage.src = imageUrl;
+        overlay.style.display = 'flex';
+    }
+
+    document.getElementById('fullscreenOverlay').onclick = function () {
+        this.style.display = 'none';
+    };
+
+</script>
+
+</body>
+</html>

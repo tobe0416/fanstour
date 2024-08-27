@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-image: url("image/background.jpg");
+            background-size: cover;
+            background-position: center;
+            overflow: hidden; /* 防止出现滚动条 */
+        }
+        .login-container {
+            position: relative;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border: 1px solid #ddd;
+            z-index: 10; /* 确保登录框在最上层 */
+        }
+        .login-container h2 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 24px;
+            color: #333;
+        }
+        .login-container label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .login-container input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            color: #aaa;
+        }
+        .login-container .login-btn {
+            width: 100%;
+            padding: 10px;
+            background-color: #ADD8E6;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .login-container .login-btn:hover {
+            background-color: #87CEEB;
+        }
+        .login-container .register-link {
+            text-align: center;
+            margin-top: 20px;
+            color: #333;
+        }
+        .login-container .register-link a {
+            color: #333;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .login-container .register-link a:hover {
+            text-decoration: underline;
+        }
+        
+        .bubble {
+            position: absolute;
+            width: 60px; /* 调整泡泡大小 */
+            height: 60px; /* 调整泡泡大小 */
+            background-size: cover;
+            border-radius: 50%;
+            animation: float infinite; /* 漂浮动画 */
+            z-index: 5; /* 确保泡泡在登录框后面 */
+            opacity: 0.7; /* 增加一些透明度 */
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(30px, -50px) scale(1.1); }
+            50% { transform: translate(-30px, -100px) scale(0.9); }
+            75% { transform: translate(-50px, 50px) scale(1.05); }
+            100% { transform: translate(0, 0) scale(1); }
+        }
+
+        /* 为每个泡泡调整位置、大小和动画时长 */
+        .bubble1 { background-image: url('image/idol/AESPA.JPG'); top: 5%; left: 10%; animation-duration: 12s; }
+        .bubble2 { background-image: url('image/idol/BABYMONSTER.JPG'); top: 20%; left: 70%; animation-duration: 14s; }
+        .bubble3 { background-image: url('image/idol/ENHYPEN.JPG'); top: 60%; left: 15%; animation-duration: 10s; }
+        .bubble4 { background-image: url('image/idol/EXO.jpg'); top: 25%; left: 55%; animation-duration: 15s; }
+        .bubble5 { background-image: url('image/idol/KISS_OF_LIFE.JPG'); top: 75%; left: 40%; animation-duration: 13s; }
+        .bubble6 { background-image: url('image/idol/LE_SSERAFIM.JPG'); top: 10%; left: 35%; animation-duration: 11s; }
+        .bubble7 { background-image: url('image/idol/NCT127.jpg'); top: 40%; left: 85%; animation-duration: 9s; }
+        .bubble8 { background-image: url('image/idol/NCTDREAM.jpg'); top: 80%; left: 25%; animation-duration: 16s; }
+        .bubble9 { background-image: url('image/idol/NCTWISH.jpg'); top: 35%; left: 5%; animation-duration: 18s; }
+        .bubble10 { background-image: url('image/idol/NEW_JEANS.JPG'); top: 50%; left: 50%; animation-duration: 20s; }
+        .bubble11 { background-image: url('image/idol/NMIXX.JPG'); top: 65%; left: 80%; animation-duration: 17s; }
+        .bubble12 { background-image: url('image/idol/RedVelvet.jpg'); top: 45%; left: 25%; animation-duration: 13s; }
+        .bubble13 { background-image: url('image/idol/RIIZE.jpg'); top: 70%; left: 60%; animation-duration: 15s; }
+        .bubble14 { background-image: url('image/idol/SEVENTEEN.JPG'); top: 10%; left: 50%; animation-duration: 19s; }
+        .bubble15 { background-image: url('image/idol/STRAYKIDS.JPG'); top: 85%; left: 15%; animation-duration: 21s; }
+        .bubble16 { background-image: url('image/idol/TXT.JPG'); top: 5%; left: 65%; animation-duration: 12s; }
+        .bubble17 { background-image: url('image/idol/ZB1.JPG'); top: 30%; left: 45%; animation-duration: 14s; }
+        .bubble18 { background-image: url('image/idol/ITZY.JPG'); top: 15%; left: 30%; animation-duration: 10s; }
+        .bubble19 { background-image: url('image/idol/TWICE.JPG'); top: 20%; left: 95%; animation-duration: 18s; }
+        .bubble20 { background-image: url('image/idol/BLACKPINK.JPG'); top: 70%; left: 10%; animation-duration: 22s; }
+    </style>
+</head>
+<body>
+    <!-- 漂浮泡泡 -->
+    <div class="bubble bubble1"></div>
+    <div class="bubble bubble2"></div>
+    <div class="bubble bubble3"></div>
+    <div class="bubble bubble4"></div>
+    <div class="bubble bubble5"></div>
+    <div class="bubble bubble6"></div>
+    <div class="bubble bubble7"></div>
+    <div class="bubble bubble8"></div>
+    <div class="bubble bubble9"></div>
+    <div class="bubble bubble10"></div>
+    <div class="bubble bubble11"></div>
+    <div class="bubble bubble12"></div>
+    <div class="bubble bubble13"></div>
+    <div class="bubble bubble14"></div>
+    <div class="bubble bubble15"></div>
+    <div class="bubble bubble16"></div>
+    <div class="bubble bubble17"></div>
+    <div class="bubble bubble18"></div>
+    <div class="bubble bubble19"></div>
+    <div class="bubble bubble20"></div>
+    
+    <div class="login-container">
+        <h2>Login</h2>
+        <form id="loginForm">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" placeholder="输入用户名" required>
+
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" placeholder="输入密码" required>
+
+            <button type="submit" class="login-btn">Login</button>
+        </form>
+        <div class="register-link">
+            No account? <a href="register.html">Register→</a>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            fetch('http://localhost:4000/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    userName: username,
+                    passWord: password
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.code === 1) {
+                    alert('登录成功');
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    window.location.href = 'index.html';
+                } else {
+                    alert('用户名或密码错误');
+                }
+            })
+            .catch(error => {
+                console.error('错误:', error);
+                alert('登录时发生错误');
+            });
+        });
+    </script>
+</body>
+</html>

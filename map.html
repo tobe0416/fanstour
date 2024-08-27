@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>场馆地图</title>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+        .controls {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 1000;
+            width: 200px;
+            font-size: 14px;
+        }
+        .controls label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        .controls input, .controls select {
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 14px;
+        }
+        .controls input[type="number"] {
+            width: calc(100% - 20px); /* 窄一点 */
+        }
+        .controls button {
+            width: 100%;
+            padding: 5px;
+            background: #007BFF;
+            border: none;
+            border-radius: 3px;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .controls button:hover {
+            background: #0056b3;
+        }
+    </style>
+    <script src="https://api.map.baidu.com/api?v=3.0&ak=QDi7CkInDi8uvdiL5rwsz4RgJNwpktCR"></script>
+</head>
+<body>
+    <div class="controls">
+        <label for="radius">缓冲区半径（米）:</label>
+        <input type="number" id="radius" value="1000" min="100" step="100">
+        <label for="category">搜索类别:</label>
+        <select id="category">
+            <option value="住宿">住宿</option>
+            <option value="美食">美食</option>
+            <option value="洗手间">洗手间</option>
+            <option value="商场">商场</option>
+        </select>
+        <button onclick="updateSearch()">更新搜索</button>
+    </div>
+    <div id="map"></div>
+    <script>
+        let map;
+        let circle;
+        let local;
+        let currentCategory = '住宿';
+        let currentRadius = 1000;
+
+        function initializeMap(location) {
+            map = new BMap.Map("map");
+            map.enableScrollWheelZoom(true); // 启用鼠标滚轮缩放
+            const geoc = new BMap.Geocoder();
+
+            geoc.getPoint(location, function(point) {
+                if (point) {
+                    map.centerAndZoom(point, 15);
+                    const marker = new BMap.Marker(point);
+                    map.addOverlay(marker);
+                    map.openInfoWindow(new BMap.InfoWindow(`地点：${location}`, {
+                        width: 250,
+                        height: 100,
+                        title: "场馆位置"
+                    }), point);
+
+                    // 初始化搜索并设置缓冲区
+                    updateSearch(point); 
+                } else {
+                    alert('无法解析该地点');
+                }
+            });
+        }
+
+        function updateSearch(center) {
+            const radiusInput = document.getElementById('radius');
+            const categorySelect = document.getElementById('category');
+
+            currentRadius = parseInt(radiusInput.value) || 1000;
+            currentCategory = categorySelect.value || '住宿';
+
+            if (map) {
+                map.clearOverlays();
+
+                if (!center) {
+                    center = map.getCenter();
+                }
+
+                const circle = new BMap.Circle(center, currentRadius, {
+                    fillColor: "blue",
+                    strokeWeight: 1,
+                    fillOpacity: 0.3,
+                    strokeOpacity: 0.3
+                });
+                map.addOverlay(circle);
+
+                local = new BMap.LocalSearch(map, {
+                    renderOptions: { map: map },
+                    pageCapacity: 10
+                });
+                local.searchNearby(currentCategory, center, currentRadius);
+            }
+        }
+
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const location = getQueryParam('location');
+            if (location) {
+                initializeMap(location);
+            }
+        });
+    </script>
+</body>
+</html>

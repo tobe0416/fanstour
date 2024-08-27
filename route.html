@@ -1,0 +1,236 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible"="IE=edge">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
+    <style>
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        #container {
+            width: 85%;
+            height: 100%;
+            float: right;
+        }
+
+        #sidebar {
+            width: 15%;
+            height: 100%;
+            float: left;
+            background-color: white;
+            box-shadow: 2px 0px 6px rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        #sidebar h3 {
+            margin-top: 0;
+        }
+
+        #placesList {
+            max-height: 55%;
+            overflow-y: auto;
+            margin-bottom: 10px;
+        }
+
+        #routeDetails {
+            max-height: 35%;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+
+        #sidebar .place-item {
+            margin-bottom: 8px;
+        }
+
+        #sidebar .place-item label {
+            display: block;
+        }
+
+        #sidebar button {
+            width: 100%;
+            padding: 10px;
+            background-color: #009cf9;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+    </style>
+    <title>路径规划</title>
+    <script type="text/javascript">
+        window._AMapSecurityConfig = {
+            securityJsCode: "db2ac1369106d4e9eed9abedae8b3b40",
+        }
+    </script>
+    <script src="https://webapi.amap.com/maps?v=2.0&key=8f32ef8694e1d12c6290175a95980155&plugin=AMap.Driving,AMap.Walking,AMap.Riding"></script>
+</head>
+
+<body>
+    <div id="sidebar">
+        <h3>收藏地点</h3>
+        <div id="placesList"></div>
+        <h4>选择出行方式</h4>
+        <select id="travelMode">
+            <option value="driving">驾车</option>
+            <option value="walking">步行</option>
+            <option value="riding">骑行</option>
+        </select>
+        <button onclick="planRoute()">规划路径</button>
+        <div id="routeDetails"></div>
+    </div>
+    <div id="container"></div>
+    <script type="text/javascript">
+        document.addEventListener('DOMContentLoaded', function () {
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (user) {
+                var userId = user.user_id;
+                console.log('Fetched User ID:', userId);
+                fetchUserFavorites(userId);
+            } else {
+                console.error('未能获取有效的用户数据');
+            }
+        });
+
+        var map = new AMap.Map("container", {
+            center: [116.397559, 39.89621], // 设置地图的初始中心点
+            zoom: 14 // 设置地图的初始缩放级别
+        });
+
+        var currentUser = {
+            favorites: [] // 存储用户收藏的地点
+        };
+
+        var selectedPlaces = []; // 用户选择的地点
+
+        function fetchUserFavorites(userId) {
+            fetch(`http://localhost:4000/favoritePlaceswithlatlon/${userId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.code === 1) {
+                        currentUser.favorites = data.data || [];
+                        generateCheckpoints();
+                    } else {
+                        console.error('获取用户收藏信息失败:', data.message);
+                    }
+                })
+                .catch(error => console.error('获取用户收藏信息失败:', error));
+        }
+
+        function generateCheckpoints() {
+            const listContainer = document.getElementById('placesList');
+            listContainer.innerHTML = '';
+
+            currentUser.favorites.forEach(fav => {
+                if (fav.latitude == null || fav.longitude == null || fav.latitude === '0.000000' || fav.longitude === '0.000000') {
+                    console.error("缺少经纬度数据:", fav);
+                    return;
+                }
+
+                const listItem = document.createElement('div');
+                listItem.innerHTML = `
+                    <label>
+                        <input type="checkbox" value="${fav.checkpoint_id}" data-lat="${fav.latitude}" data-lng="${fav.longitude}" onchange="selectPlace(${fav.checkpoint_id}, this)">
+                        ${fav.name}
+                    </label>
+                `;
+                listContainer.appendChild(listItem);
+            });
+        }
+
+        function selectPlace(checkpointId, checkbox) {
+            const lat = parseFloat(checkbox.getAttribute('data-lat'));
+            const lng = parseFloat(checkbox.getAttribute('data-lng'));
+
+            if (checkbox.checked) {
+                selectedPlaces.push({ checkpoint_id: checkpointId, lat: lat, lng: lng });
+            } else {
+                selectedPlaces = selectedPlaces.filter(place => place.checkpoint_id !== checkpointId);
+            }
+        }
+
+        function calculateRoute(selectedPlaces) {
+            if (selectedPlaces.length < 2) {
+                alert("请至少选择两个地点进行路径规划。");
+                return;
+            }
+
+            const start = new AMap.LngLat(selectedPlaces[0].lng, selectedPlaces[0].lat);
+            const end = new AMap.LngLat(selectedPlaces[selectedPlaces.length - 1].lng, selectedPlaces[selectedPlaces.length - 1].lat);
+            const waypoints = selectedPlaces.slice(1, selectedPlaces.length - 1).map(place => new AMap.LngLat(place.lng, place.lat));
+
+            const drivingOption = {
+                policy: AMap.DrivingPolicy.LEAST_TIME, // 路线计算的策略
+                map: map,
+                waypoints: waypoints
+            };
+
+            const driving = new AMap.Driving(drivingOption);
+            driving.search(start, end, function (status, result) {
+                if (status === 'complete') {
+                    displayRouteDetails(result.routes[0]);
+                    console.log('路径规划成功:', result);
+                } else {
+                    console.error('路径规划失败:', result);
+                }
+            });
+        }
+
+        function displayRouteDetails(route) {
+            const detailsContainer = document.getElementById('routeDetails');
+            detailsContainer.innerHTML = '';
+
+            if (!route) {
+                detailsContainer.innerHTML = '<p>无法获取路线详情。</p>';
+                return;
+            }
+
+            const distance = route.distance / 1000; // 单位为公里
+            const time = Math.round(route.time / 60); // 单位为分钟
+
+            detailsContainer.innerHTML = `
+                <p>路线距离: ${distance} 公里</p>
+                <p>预计时间: ${time} 分钟</p>
+            `;
+
+            route.steps.forEach((step, index) => {
+                const stepItem = document.createElement('div');
+                stepItem.innerHTML = `<p>${index + 1}. ${step.instruction}</p>`;
+                detailsContainer.appendChild(stepItem);
+            });
+        }
+
+        function planRoute() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+            selectedPlaces = [];
+
+            checkboxes.forEach(checkbox => {
+                const lat = parseFloat(checkbox.getAttribute('data-lat'));
+                const lng = parseFloat(checkbox.getAttribute('data-lng'));
+
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    selectedPlaces.push({ lat: lat, lng: lng });
+                } else {
+                    console.error("无效的经纬度数据:", { lat, lng });
+                }
+            });
+
+            if (selectedPlaces.length < 2) {
+                alert("请至少选择两个地点进行路径规划。");
+                return;
+            }
+
+            calculateRoute(selectedPlaces);
+        }
+    </script>
+</body>
+
+</html>

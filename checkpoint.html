@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>打卡点地图界面</title>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <!-- icon库 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Leaflet Draw CSS -->
+    <link rel="stylesheet" href="leaflet.draw.css" />
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <!-- Leaflet Draw JS -->
+    <script src="leaflet.draw.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Turf.js/6.5.0/turf.min.js"></script>
+    <!-- Bootstrap JS, Popper.js, and jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            height: 100vh;
+        }
+
+        #map {
+            height: 100%;
+            width: 68%;
+            margin: 0;
+            padding: 0;
+        }
+
+        .back{
+            font-size: 16px;
+            color: black;
+            cursor: pointer;
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            z-index: 1000;
+        }
+        .home{
+            font-size: 16px;
+            color: black;
+            cursor: pointer;
+            position: absolute;
+            top: 10px;
+            left: 100px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            z-index: 1000;
+        }
+        #heatmap-label {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color:rgba(255,255,255, 0.3);
+            padding: 5px 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            font-size: 16px;
+            z-index: 1000;
+        }
+
+        #heatmap-label input[type="checkbox"] {
+            margin-right: 5px;
+        }
+
+        #checkpoints-label {
+            position: absolute;
+            top: 50px;
+            right: 10px;
+            background-color:rgba(255,255,255, 0.3);
+            padding: 5px 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            font-size: 16px;
+            z-index: 1000;
+        }
+
+        #selectlist{
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background-color:rgba(255,255,255, 0.3);
+            padding: 5px 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            font-size: 16px;
+            z-index: 1000;
+        }
+        
+        select{
+            /* width:%;  */
+            padding: 10px; 
+            font-size: 16px; 
+            border-radius: 5px;
+            margin: 5px;
+            /* margin-left: 12px; */
+        }
+
+        #PolygonSearch{
+            position: absolute; 
+            bottom: 10px; 
+            left: 10px; 
+            background-color:rgba(255,255,255, 0.3);
+            padding: 5px 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            font-size: 16px;
+            z-index: 1000;
+
+        }
+        
+        .polygonbtn{
+            padding: 5px 10px; 
+            font-size: 16px; 
+            border-radius: 8px;
+            border: #333 solid 1px;
+            cursor: pointer;
+            color: black;
+            background-color: rgb(255, 255, 255); 
+            margin: 5px; 
+        }
+        #sidebar {
+            width: 32%;
+            /* background-color: rgba(250, 243, 192,0.7); */
+            background-image: url("image/sidebar.jpg");
+            overflow-y: auto;
+            padding: 20px;
+            padding-top: 70px; /* 增加顶部填充，让内容下移 */
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #search-box {
+            padding: 10px; 
+            font-size: 16px; 
+            width: 70%; 
+            /* margin-bottom: 15px; */
+            margin-right: 20px; 
+            margin-left: 11px;
+            border-radius: 5px;
+            margin-top: 5px; /* 增加上边距，让输入框下移 */
+        }
+
+        #searchbutton {
+            width: 18%; 
+            padding: 9px; 
+            font-size: 16px; 
+            font-weight: bolder;
+            border-radius: 70px;
+            /* margin-bottom: 15px; */
+            cursor: pointer;
+            color: black;
+            background-color: rgb(255, 255, 255); /* 修正颜色值的错误 */
+            margin-top: 5px; /* 增加上边距，让按钮下移 */
+        }
+
+
+        #checkpoints {
+            flex: 1;
+            overflow-y: auto; /* 仅在打卡点部分添加滚动条 */
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .checkpoint-item {
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            font-size: 16px;
+            display: flex;
+            flex-direction: column; /* 修改为列布局 */
+            gap: 10px; /* 添加间隙 */
+        }
+
+        .checkpoint-info {
+            margin-left: 15px !important;
+            text-align: left !important;
+        }
+
+        .checkpoint-item .buttons {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .star-button {
+            background-color: transparent;
+            border: none;
+            font-size: 20px;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+        .marker-button {
+            background-color: transparent;
+            border: none;
+            font-size: 20px;
+            /* margin-left: 10px; */
+            cursor: pointer;
+        }
+        .star-button:focus,
+        button:focus {
+            outline: none;
+        }
+
+        .posts-button{
+            background-color: transparent;
+            border: none;
+            font-size: 20px;
+            margin-left: 145px;
+            cursor: pointer;
+        }
+        .location-icon {
+            font-size: 20px;
+            color: #333; /* 可根据需要调整颜色 */
+        }
+
+
+        .carousel-item {
+            height: 100%; 
+        }
+
+        .carousel-item img {
+            object-fit: cover; /* 确保图片填满容器并保持比例 */
+            border-radius: 5px;
+            /* width: 100px!important;  */
+            /* height: 100%;  */
+        }
+
+        .leaflet-marker-shadow {
+            opacity: 0.5;  /* 阴影的透明度 */
+        }
+
+        /* 自定义滚动条 */
+        #sidebar::-webkit-scrollbar {
+            width: 8px; /* 滚动条的宽度 */
+        }
+
+        #sidebar::-webkit-scrollbar-track {
+            background: #faf3c0ff; /* 滚动条轨道的背景颜色 */
+            border-radius: 10px; /* 圆角效果 */
+        }
+
+        #sidebar::-webkit-scrollbar-thumb {
+            background: #888; /* 滚动条的颜色 */
+            border-radius: 10px; /* 圆角效果 */
+        }
+
+        #sidebar::-webkit-scrollbar-thumb:hover {
+            background: #555; /* 滚动条在鼠标悬停时的颜色 */
+        }
+
+        /* 帖子弹窗 */
+        .images-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* 网格布局，自动适应列数 */
+            gap: 10px; /* 图片之间的间隙 */
+            margin-bottom: 20px; /* 图片与评论之间的间距 */
+            justify-items: center; /* 图片居中对齐 */
+        }
+
+        .images-section img {
+            max-width: 100%;
+            height: auto; /* 保持图片原始比例 */
+            object-fit: cover; /* 保持图片比例 */
+            border-radius: 5px; /* 为图片添加圆角 */
+        }
+
+        .comment-item {
+            padding: 10px;
+            margin-bottom: 10px;
+            background-color: #f1f1f1;
+            border-radius: 5px;
+        }
+        .name {
+            margin-bottom: 10px; /* 在名称下方添加10px的间距 */
+        }
+
+
+    </style>
+</head>
+<body>
+
+<div id="map">
+    <div class="back" onclick="goBack()">&lt; BACK</div>
+    <div class="home" onclick="goHome()">HOME</div>
+    <label id="heatmap-label">
+        <input type="checkbox" id="toggle-heatmap" checked>
+        heatmap
+    </label>
+    <label id="checkpoints-label">
+        <input type="checkbox" id="toggle-checkpoints" checked>
+        checkpoints
+    </label>
+    
+    <div id="selectlist">
+        <select id="country-select" onchange="updateCities()">
+            <option value="">选择国家</option>
+        </select>
+        <select id="city-select" onchange="updateMapCenter()">
+            <option value="">选择城市</option>
+        </select>
+        <br>
+            <button onclick="startPolygonDraw(event)" class="polygonbtn">多边形查询</button>
+            <button onclick="clearPolygonAndResults()"class="polygonbtn">还原</button>
+            <button onclick="location.reload()"class="polygonbtn">Re</button>
+       </div>
+    </div>
+      <!-- 添加多边形查询和清除按钮 -->
+       <!-- <div id="PolygonSearch">
+            
+      
+</div> -->
+
+<div id="sidebar">
+    <div id="search-part">
+        <input type="text" id="search-box" placeholder="搜索地点..." >
+        <button id="searchbutton" onclick="searchLocation()">搜索</button>
+    </div>
+    <hr width=85% color=white>
+
+    <div id="checkpoints"></div>
+    <div class="details"></div>
+    <!-- Modal -->
+    <div class="modal fade" id="postsModal" tabindex="-1" role="dialog" aria-labelledby="postsModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="postsModalLabel">相关帖子</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="modal-posts-content">
+                    <!-- 动态插入帖子内容 -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/heatmapjs@2.0.2/heatmap.js"></script>
+<script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+<script>
+    //返回
+       function goBack() {
+        window.location.href = 'post1.html';
+    }
+    function goHome() {
+        window.location.href = 'home.html';
+    }
+
+     // 从localStorage中获取用户信息
+    let currentUser = null;
+    document.addEventListener('DOMContentLoaded', function() {
+        currentUser = JSON.parse(localStorage.getItem('user'));
+        if (!currentUser) {
+            alert('用户未登录，请先登录');
+            window.location.href = 'login.html'; // 重定向到登录页面
+        } else {
+            console.log('当前用户:', currentUser);
+            fetchUserFavorites(currentUser.user_id);// 先加载收藏信息再生成打卡点
+        }
+    });
+
+//MAP
+    // 设置初始地图位置和缩放级别
+    var map = new L.Map('map', {
+    center: new L.LatLng(37.5665, 126.9780),
+    zoom: 4,
+    zoomControl: false
+});
+    var baseLayer =L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+    // 用于存储绘制的多边形
+    var isDrawing = false;
+    var polygonPoints = [];
+    var polygonLayer;
+//热力图
+    // 创建一个空的热力图图层
+    var heatmapLayer = L.heatLayer([], {
+        radius: 35, // 热力点的半径
+        blur: 15,   // 模糊度
+        maxZoom: 17 // 最大缩放级别
+    });
+
+    // 从服务器加载热力图数据
+    fetch('http://localhost:4000/heatdata')
+        .then(response => response.json())
+        .then(data => {
+            // 将数据转换为热力图格式
+            var heatData = data.map(point => [point.latitude, point.longitude, point.likes_count]);
+            heatmapLayer.setLatLngs(heatData);
+        })
+        .catch(error => console.error('加载热力图数据出错：', error));
+
+    // 将热力图图层添加到地图
+    map.addLayer(heatmapLayer);
+
+    // 获取复选框元素
+     var toggleHeatmap = document.getElementById('toggle-heatmap');
+    // 复选框事件监听器
+    toggleHeatmap.addEventListener('change', function() {
+        if (this.checked) {
+            heatmapLayer.addTo(map); // 添加热力图图层到地图
+        } else {
+            map.removeLayer(heatmapLayer); // 从地图中移除热力图图层
+        }
+    });
+        //自定义marker
+        var originalIcon = L.icon({
+                        iconUrl: 'image/marker/original.png',
+                        shadowUrl: 'image/marker/shadow.png',
+                        iconSize: [19, 48],  // 根据需要调整大小
+                        iconAnchor: [11, 48],  // 图标的锚点
+                        popupAnchor: [-3, -40] , // 根据需要调整弹出窗口锚点
+                        shadowSize: [30, 30],  // 阴影的尺寸，等比例缩小后的尺寸
+                        shadowAnchor: [-2, 30]  // 阴影的锚点位置
+                    });
+                    var highlightIcon = L.icon({
+                        iconUrl: 'image/marker/highlight.png', 
+                        shadowUrl: 'image/marker/shadow.png',
+                        iconSize: [19, 48],  // 根据需要调整大小
+                         iconAnchor: [11, 48],  // 图标的锚点
+                        popupAnchor: [-3, -40] , // 根据需要调整弹出窗口锚点
+                        shadowSize: [30, 30],  // 阴影的尺寸，等比例缩小后的尺寸
+                        shadowAnchor: [-2, 30]  // 阴影的锚点位置
+                    });
+
+//打卡点图层
+    // 定义打卡点图层
+    var checkpointMarkersLayer = L.layerGroup().addTo(map);
+
+    // 获取复选框元素
+    var toggleCheckpoints = document.getElementById('toggle-checkpoints');
+
+    // 为复选框添加事件监听器
+    toggleCheckpoints.addEventListener('change', function() {
+        if (this.checked) {
+            map.addLayer(checkpointMarkersLayer);  // 添加打卡点图层到地图
+        } else {
+            map.removeLayer(checkpointMarkersLayer);  // 从地图中移除打卡点图层
+        }
+    });
+
+    //用户收藏数据
+    function fetchUserFavorites(userId) {
+        fetch(`http://localhost:4000/user_favorites/${userId}`)
+        .then(response => response.json())
+        .then(data => {
+            currentUser.favorites = data.favorites || []; // 假设后端返回的数据结构包含 favorites
+            generateCheckpoints();
+        })
+        .catch(error => console.error('获取用户收藏信息失败:', error));
+    }
+
+    var checkpoints = [];   //全局变量 数据                 
+  
+
+function generateCheckpoints() {
+    // 清除之前的所有标记
+    checkpointMarkersLayer.clearLayers();
+
+    // 从服务器获取打卡点的信息
+    fetch('http://localhost:4000/checkpoints')
+        .then(response => response.json())
+        .then(result => {
+            console.log("Checkpoints data:", result); // 输出获取到的打卡点数据，方便调试
+
+            checkpoints = result.data; // 将打卡点数据存储到变量 checkpoints 中
+
+            // 检查是否获取到的打卡点数据是一个数组
+            if (Array.isArray(checkpoints)) {
+                // 遍历每一个打卡点
+                checkpoints.forEach(checkpoint => {
+                    // 判断当前用户是否已收藏此打卡点
+                    const isFavorite = currentUser && currentUser.favorites && currentUser.favorites.includes(checkpoint.checkpoint_id);
+                    // 如果已收藏，则星星图标为实心；否则为空心
+                    const starClass = isFavorite ? 'fas' : 'far';
+
+                    // 生成 Bootstrap Carousel 结构
+                    let carouselHTML = '';
+                    if (checkpoint.images && checkpoint.images.length > 0) {
+                        carouselHTML = `
+                            <div id="carousel-${checkpoint.checkpoint_id}" class="carousel slide" data-ride="carousel">
+                                <div class="carousel-inner">
+                                    ${checkpoint.images.map((imageUrl, index) => `
+                                        <div class="carousel-item ${index === 0 ? 'active' : ''}">
+                                            <img src="${imageUrl}" class="d-block w-100 carousel-img" alt="打卡点图片">
+                                        </div>
+                                    `).join('')}
+                                </div>
+                                <a class="carousel-control-prev" href="#carousel-${checkpoint.checkpoint_id}" role="button" data-slide="prev">
+                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                    <span class="sr-only">Previous</span>
+                                </a>
+                                <a class="carousel-control-next" href="#carousel-${checkpoint.checkpoint_id}" role="button" data-slide="next">
+                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                    <span class="sr-only">Next</span>
+                                </a>
+                            </div>`;
+                    } else {
+                        carouselHTML = '<p>暂无相关图片。</p>';
+                    }
+
+                    // 创建一个打卡点的 DOM 元素，用于显示在侧边栏
+                    const checkpointElement = document.createElement('div');
+                    checkpointElement.className = 'checkpoint-item'; // 为元素添加样式类
+                    checkpointElement.innerHTML = `
+                    ${carouselHTML} <!-- 打卡点的图片 -->
+                    <div class="checkpoint-info">
+                        <b><div class="name">${checkpoint.name}</div> </b><!-- 打卡点的名称 -->
+                        
+                        <div class="description">${checkpoint.description}</div> <!-- 打卡点的简介 -->
+                    </div>
+                    <div class="buttons">
+                        <button class="star-button" onclick="toggleFavorite(${checkpoint.checkpoint_id}, this)"> <!-- 收藏按钮 -->
+                            <i class="${starClass} fa-star"></i>
+                        </button>
+                       <button class="marker-button"  onclick="moveToLocation(${checkpoint.latitude}, ${checkpoint.longitude}, ${checkpoint.checkpoint_id})"> <!-- 定位按钮 -->
+                            <i class="fa-solid fa-location-dot location-icon"></i>
+                        </button>
+                         <button class="posts-button" onclick="showPostsModal(${checkpoint.checkpoint_id})"> <!-- 展示post按钮 -->
+                             已有打卡 <i class="fa-solid fa-arrow-left"></i> 
+                        </button>
+                    </div>`;
+                    
+                    // 将打卡点的元素添加到侧边栏的打卡点列表中
+                    document.getElementById('checkpoints').appendChild(checkpointElement);
+
+                    // 在地图上添加标记，显示搜索结果的位置
+                    var marker = L.marker([checkpoint.latitude, checkpoint.longitude], { icon: originalIcon });
+                    
+                    // 将标记添加到图层组中
+                    checkpointMarkersLayer.addLayer(marker);
+
+                    // 创建一个包含打卡点名称和图片的弹出窗口内容
+                    var popupContent = `<div style="width:200px; height:auto;">
+                                            <strong>${checkpoint.name}</strong>
+                                            <div style="margin-top:5px;">
+                                                <img src="${checkpoint.images[0]}" alt="Image" style="width:100%; height:100%; object-fit:cover;">
+                                            </div>
+                                        </div>`;
+
+                    // 绑定弹出窗口到标记
+                    marker.bindPopup(popupContent);
+                    
+                    // 存储标记到打卡点数据中，以便在moveToLocation函数中使用
+                    checkpoint.marker = marker;
+                });
+            } else {
+                // 如果返回的数据不是数组，输出错误信息
+                console.error("期望获取数组，但实际获取的是", typeof checkpoints);
+            }
+        })
+        .catch(error => {
+            // 捕获并输出获取打卡点信息时发生的错误
+            console.error("获取打卡点时出错：", error);
+        });
+}
+
+
+
+    //收藏
+    function toggleFavorite(checkpointId, starButton) {
+        if (!currentUser) {
+            alert('请先登录');
+            return;
+        }
+
+        const data = {
+            user_id: currentUser.user_id,
+            checkpoint_id: checkpointId
+        };
+
+        fetch('http://localhost:4000/favorite', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.code === 1) {
+            starButton.querySelector('i').classList.remove('far');
+            starButton.querySelector('i').classList.add('fas');
+            alert('收藏成功');
+        } else if (result.code === 2) {
+            starButton.querySelector('i').classList.remove('fas');
+            starButton.querySelector('i').classList.add('far');
+                alert('已取消收藏');
+            }
+        })
+        .catch(error => {
+            console.error('收藏请求失败:', error);
+            alert('收藏请求失败');
+        });
+    }
+
+    
+   // 定位
+function moveToLocation(lat, lng, checkpointId) {
+    // 检查 checkpoints 是否是数组
+    if (Array.isArray(checkpoints)) {
+        // 首先，将所有标记的图标重置为 originalIcon
+        checkpoints.forEach(cp => {
+            if (cp.marker) {
+                cp.marker.setIcon(originalIcon);
+                // 关闭之前打开的弹出窗口
+                cp.marker.closePopup();
+            }
+        });
+
+        // 查找要高亮的打卡点
+        const checkpoint = checkpoints.find(cp => cp.checkpoint_id === checkpointId);
+        
+        if (checkpoint && checkpoint.marker) {
+            // 设置地图中心到标记位置
+            map.setView([lat, lng], 16);  // 10为缩放级别
+
+            // 切换图标为高亮图标
+            checkpoint.marker.setIcon(highlightIcon);
+
+            // 创建一个弹出窗口并附加到标记上
+            const popupContent = `<div style="width:200px; height:auto;">
+                                    <strong>${checkpoint.name}</strong>
+                                    <div style="margin-top:5px;">
+                                        <img src="${checkpoint.images[0]}" alt="Image" style="width:100%; height:100%; object-fit:cover;">
+                                    </div>
+                                  </div>`;
+            checkpoint.marker.bindPopup(popupContent).openPopup();
+        } else {
+            console.error("找不到标记或打卡点。");
+        }
+    } else {
+        console.error("checkpoints 不是一个数组，无法使用 find 方法。");
+    }
+}
+
+    //搜索框搜索
+    function searchLocation() {
+    var query = document.getElementById('search-box').value.trim(); // 获取并去除用户输入的空白字符
+    // 清空当前显示的打卡点列表
+    document.getElementById('checkpoints').innerHTML = '';
+
+    // 清空现有的打卡点标记图层
+    checkpointMarkersLayer.clearLayers();
+
+    if (query) { // 如果用户输入了内容
+        // 进行本地搜索，过滤符合查询的打卡点
+        const filteredCheckpoints = checkpoints.filter(checkpoint => {
+            const name = checkpoint.name ? checkpoint.name.toLowerCase() : ''; // 确保名称存在
+            const description = checkpoint.description ? checkpoint.description.toLowerCase() : ''; // 确保描述存在
+
+            // 检查名称或描述是否包含查询字符串
+            return name.includes(query.toLowerCase()) || description.includes(query.toLowerCase());
+        });
+
+        if (filteredCheckpoints.length > 0) { // 如果返回结果不为空
+            // 遍历查询结果，创建打卡点元素并添加到页面
+            filteredCheckpoints.forEach(checkpoint => {
+                const checkpointElement = document.createElement('div');
+                checkpointElement.className = 'checkpoint-item'; // 为元素添加样式类
+                // 生成 Bootstrap Carousel 结构
+                let carouselHTML = '';
+                if (checkpoint.images && checkpoint.images.length > 0) {
+                    carouselHTML = `
+                        <div id="carousel-${checkpoint.checkpoint_id}" class="carousel slide" data-ride="carousel">
+                            <div class="carousel-inner">
+                                ${checkpoint.images.map((imageUrl, index) => `
+                                    <div class="carousel-item ${index === 0 ? 'active' : ''}">
+                                        <img src="${imageUrl}" class="d-block w-100 carousel-img" alt="打卡点图片">
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <a class="carousel-control-prev" href="#carousel-${checkpoint.checkpoint_id}" role="button" data-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span class="sr-only">Previous</span>
+                            </a>
+                            <a class="carousel-control-next" href="#carousel-${checkpoint.checkpoint_id}" role="button" data-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span class="sr-only">Next</span>
+                            </a>
+                        </div>`;
+                } else {
+                    carouselHTML = '<p>没有找到相关图片。</p>';
+                }
+                checkpointElement.innerHTML = `
+                    ${carouselHTML} <!-- 打卡点的图片 -->
+                    <div class="checkpoint-info">
+                        <b><div class="name">${checkpoint.name}</div> </b><!-- 打卡点的名称 -->
+                        
+                        <div class="description">${checkpoint.description}</div> <!-- 打卡点的简介 -->
+                    </div>
+                    <div class="buttons">
+                        <button class="star-button" onclick="toggleFavorite(${checkpoint.checkpoint_id}, this)">
+                            <i class="far fa-star"></i>
+                        </button>
+                        <button class="marker-button" onclick="moveToLocation(${checkpoint.latitude}, ${checkpoint.longitude}, ${checkpoint.checkpoint_id})"> <!-- 定位按钮 -->
+                            <i class="fa-solid fa-location-dot location-icon"></i>
+                        </button>
+                        <button class="posts-button" onclick="showPostsModal(${checkpoint.checkpoint_id})"> <!-- 展示post按钮 -->
+                            已有打卡 <i class="fa-solid fa-arrow-left"></i> 
+                        </button>
+                    </div>`;
+                document.getElementById('checkpoints').appendChild(checkpointElement);
+
+                // 在地图上添加标记，显示搜索结果的位置
+                var marker = L.marker([checkpoint.latitude, checkpoint.longitude], { icon: originalIcon });
+                
+                // 将标记添加到图层组中
+                checkpointMarkersLayer.addLayer(marker);
+
+                // 创建一个包含打卡点名称和图片的弹出窗口内容
+                var popupContent = `<div style="width:200px; height:auto;">
+                                        <strong>${checkpoint.name}</strong>
+                                        <div style="margin-top:5px;">
+                                            <img src="${checkpoint.images[0]}" alt="Image" style="width:100%; height:100%; object-fit:cover;">
+                                        </div>
+                                    </div>`;
+
+                // 绑定弹出窗口到标记
+                marker.bindPopup(popupContent);
+
+                // 存储标记到打卡点数据中，以便在 moveToLocation 函数中使用
+                checkpoint.marker = marker;
+            });
+        } else {
+            // 如果没有匹配结果，显示提示信息
+            alert('未找到匹配地点');
+        }
+    } else {
+        // 如果输入框为空，重新加载所有打卡点
+        generateCheckpoints();
+    }
+}
+
+
+//下拉框筛选——切换地图中心
+function Selections() {
+    const countrySelect = document.getElementById('country-select');
+    const citySelect = document.getElementById('city-select');
+    
+    // 从JSON文件加载数据
+    fetch('cities.json')
+        .then(response => response.json())
+        .then(data => {
+            citiesData = data;
+
+            // 初始化国家选择框
+            countrySelect.innerHTML = '<option value="">不限</option>';//json文件里没有，手动添加
+            Object.keys(citiesData).forEach(country => { //遍历json文件，把country以此加进去
+                const option = document.createElement('option');
+                option.value = country;
+                option.textContent = country;
+                countrySelect.appendChild(option);
+            });
+
+            //更新城市选择框并刷新地图和打卡点
+            countrySelect.onchange = function() {
+                citySelect.innerHTML = '<option value="">不限</option>';
+                const selectedCountry = countrySelect.value;
+
+                if (selectedCountry && citiesData[selectedCountry] && citiesData[selectedCountry].cities) {
+                    Object.keys(citiesData[selectedCountry].cities).forEach(city => {
+                        const option = document.createElement('option');
+                        option.value = city;
+                        option.textContent = city;
+                        citySelect.appendChild(option);
+                    });
+                }
+                updateMapCenter();
+            };
+
+            //更新地图中心
+            citySelect.onchange = updateMapCenter;
+        })
+        .catch(error => console.error('加载JSON文件错误：', error));
+}
+
+function updateMapCenter() {
+    const countrySelect = document.getElementById('country-select');
+    const citySelect = document.getElementById('city-select');
+    const selectedCountry = countrySelect.value;
+    const selectedCity = citySelect.value;
+    
+    //更新地图中心
+    let lat, lon;
+     // 如果选中了城市
+    if (selectedCity && citiesData[selectedCountry] && citiesData[selectedCountry].cities[selectedCity]) {
+        [lat, lon] = citiesData[selectedCountry].cities[selectedCity];
+        map.setView([lat, lon], 10);
+     // 如果只选中了国家
+    } else if (selectedCountry && citiesData[selectedCountry]) {
+        lat = citiesData[selectedCountry].latitude;
+        lon = citiesData[selectedCountry].longitude;
+        map.setView([lat, lon], 5);
+    // 选了不限
+    } else {
+        map.setView([37.5665, 126.9780], 4);
+        generateCheckpoints(); // 没有选择特定国家或城市时，加载所有打卡点
+        return;
+    }
+
+}
+
+
+let allPosts = [];  // 用于存储所有帖子数据
+
+function fetchAllPosts() {
+    fetch('http://localhost:4000/posts')
+        .then(response => response.json())
+        .then(result => {
+            if (result.code === 1) {
+                allPosts = result.data;
+                console.log("Posts data:", allPosts);  // 调试输出所有帖子数据
+            } else {
+                console.error("无法获取帖子数据:", result.message);
+            }
+        })
+        .catch(error => {
+            console.error('获取帖子数据时出错:', error);
+        });
+}
+
+// 显示帖子模态框的函数
+function showPostsModal(checkpointId) {
+    console.log("当前的 checkpointId:", checkpointId);  // 调试输出
+
+    // 筛选出与当前 checkpointId 相关的帖子
+    const checkpointPosts = allPosts.filter(post => post.checkpoint_id === checkpointId);
+
+    if (checkpointPosts.length > 0) {
+        // 获取所有图片
+        const imagesContent = checkpointPosts.map(post => 
+            post.images.map(image => `<img src="${image}" alt="Post Image" style="width: 100%; height: auto; max-height: 150px; margin: 5px;">`).join('')
+        ).join('');
+
+        // 获取所有评论
+        const commentsContent = checkpointPosts.map(post => `
+            <div class="comment-item">
+                <p>${post.content}</p>
+               
+            </div>
+        `).join('');
+
+        // 将内容插入到模态框中
+        document.getElementById('modal-posts-content').innerHTML = `
+            <div class="images-section">${imagesContent || '<p>暂无相关图片。</p>'}</div>
+            <hr>
+            <div class="comments-section">${commentsContent || '<p>暂无相关评论。</p>'}</div>
+        `;
+    } else {
+        document.getElementById('modal-posts-content').innerHTML = '<p>暂无相关帖子。</p>';
+    }
+
+    $('#postsModal').modal('show');
+}
+
+//多边形
+    // 启动多边形绘制模式
+    function startPolygonDraw(event) {
+    // 防止按钮点击事件传播到地图点击事件
+    event.stopPropagation();
+
+    isDrawing = true;
+    polygonPoints = [];
+
+    if (polygonLayer) {
+        map.removeLayer(polygonLayer); // 如果已经存在多边形图层，则移除它
+    }
+
+    // 在启用绘制模式之前，确保地图不监听任何点击事件
+    map.off('click', addPointToPolygon); 
+
+    // 启用多边形绘制模式
+    map.on('click', addPointToPolygon); // 监听地图左键点击事件以添加多边形顶点
+    map.on('contextmenu', finishPolygon); // 监听地图右键事件以结束绘制
+}
+
+
+// 添加顶点到多边形
+function addPointToPolygon(e) {
+    if (isDrawing) {
+        polygonPoints.push(e.latlng); // 将点击的位置添加到多边形顶点数组中
+
+        // 画出当前的点和线段
+        if (polygonLayer) {
+            map.removeLayer(polygonLayer); // 移除旧的多边形图层
+        }
+
+        polygonLayer = L.polyline(polygonPoints, { color: 'red' }).addTo(map);
+    }
+}
+
+// 结束多边形绘制
+function finishPolygon(e) {
+    // 确保事件对象存在并具有 preventDefault 方法
+    if (e && typeof e.preventDefault === 'function') {
+        e.preventDefault(); // 阻止默认的右键菜单
+    }
+
+    isDrawing = false; // 停止绘制
+
+    // 移除地图的点击事件监听器
+    map.off('click', addPointToPolygon);
+
+    // 如果已经存在多边形图层，先移除它
+    if (polygonLayer) {
+        map.removeLayer(polygonLayer);
+    }
+
+    // 创建多边形图层并添加到地图
+    polygonLayer = L.polygon(polygonPoints, { color: 'red' }).addTo(map);
+
+    // 调用搜索函数，执行搜索操作
+    performSearchWithinPolygon(polygonLayer);
+
+    // 清空顶点数组
+    polygonPoints = [];
+}
+
+
+// 清除多边形和结果
+function clearPolygonAndResults() {
+    // 如果多边形图层存在，则从地图中移除
+    if (polygonLayer) {
+        map.removeLayer(polygonLayer);
+        polygonLayer = null; // 清空多边形图层变量
+    }
+
+    // 清空打卡点标记图层
+    checkpointMarkersLayer.clearLayers();
+
+    // 清空侧栏中的打卡点列表
+    document.getElementById('checkpoints').innerHTML = '';
+      // 清空搜索输入框内容
+      document.getElementById('search-box').value = '';
+
+    // 重新生成所有打卡点
+    generateCheckpoints();
+}
+
+
+function performSearchWithinPolygon(polygon) {
+    // 获取多边形的所有边界点
+    var polygonLatLngs = polygon.getLatLngs()[0]; // 获取多边形的第一个线环
+    
+    // 将 Leaflet 多边形转换为 GeoJSON 格式
+    var polygonGeoJSON = L.polygon(polygonLatLngs).toGeoJSON();
+
+    // 清空当前显示的打卡点列表
+    document.getElementById('checkpoints').innerHTML = '';
+
+    // 清空现有的打卡点标记图层
+    checkpointMarkersLayer.clearLayers();
+
+    // 过滤在多边形内的打卡点
+    const filteredCheckpoints = checkpoints.filter(checkpoint => {
+        var latlng = L.latLng(checkpoint.latitude, checkpoint.longitude);
+        var pointGeoJSON = {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [checkpoint.longitude, checkpoint.latitude]
+            }
+        };
+
+        // 使用 Turf.js 判断点是否在多边形内
+        return turf.booleanPointInPolygon(pointGeoJSON, polygonGeoJSON);
+    });
+
+    if (filteredCheckpoints.length > 0) {
+        // 遍历查询结果，创建打卡点元素并添加到页面
+        filteredCheckpoints.forEach(checkpoint => {
+            const checkpointElement = document.createElement('div');
+            checkpointElement.className = 'checkpoint-item'; // 为元素添加样式类
+            
+            // 生成 Bootstrap Carousel 结构
+            let carouselHTML = '';
+            if (checkpoint.images && checkpoint.images.length > 0) {
+                carouselHTML = `
+                    <div id="carousel-${checkpoint.checkpoint_id}" class="carousel slide" data-ride="carousel">
+                        <div class="carousel-inner">
+                            ${checkpoint.images.map((imageUrl, index) => `
+                                <div class="carousel-item ${index === 0 ? 'active' : ''}">
+                                    <img src="${imageUrl}" class="d-block w-100 carousel-img" alt="打卡点图片">
+                                </div>
+                            `).join('')}
+                        </div>
+                        <a class="carousel-control-prev" href="#carousel-${checkpoint.checkpoint_id}" role="button" data-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="sr-only">Previous</span>
+                        </a>
+                        <a class="carousel-control-next" href="#carousel-${checkpoint.checkpoint_id}" role="button" data-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="sr-only">Next</span>
+                        </a>
+                    </div>`;
+            } else {
+                carouselHTML = '<p>没有找到相关图片。</p>';
+            }
+
+            checkpointElement.innerHTML = `
+                ${carouselHTML} <!-- 打卡点的图片 -->
+                <div class="checkpoint-info">
+                    <b><div class="name">${checkpoint.name}</div> </b><!-- 打卡点的名称 -->
+                        
+                        <div class="description">${checkpoint.description}</div> <!-- 打卡点的简介 -->
+                </div>
+                <div class="buttons">
+                    <button class="star-button" onclick="toggleFavorite(${checkpoint.checkpoint_id}, this)">
+                        <i class="far fa-star"></i>
+                    </button>
+                    <button class="marker-button" onclick="moveToLocation(${checkpoint.latitude}, ${checkpoint.longitude}, ${checkpoint.checkpoint_id})"> <!-- 定位按钮 -->
+                        <i class="fa-solid fa-location-dot location-icon"></i>
+                    </button>
+                    <button class="posts-button" onclick="showPostsModal(${checkpoint.checkpoint_id})"> <!-- 展示post按钮 -->
+                        已有打卡 <i class="fa-solid fa-arrow-left"></i> 
+                    </button>
+                </div>`;
+            
+            document.getElementById('checkpoints').appendChild(checkpointElement);
+
+            // 在地图上添加标记，显示搜索结果的位置
+            var marker = L.marker([checkpoint.latitude, checkpoint.longitude], { icon: originalIcon });
+            
+            // 将标记添加到图层组中
+            checkpointMarkersLayer.addLayer(marker);
+
+            // 创建一个包含打卡点名称和图片的弹出窗口内容
+            var popupContent = `<div style="width:200px; height:auto;">
+                                    <strong>${checkpoint.name}</strong>
+                                    <div style="margin-top:5px;">
+                                        <img src="${checkpoint.images[0]}" alt="Image" style="width:100%; height:100%; object-fit:cover;">
+                                    </div>
+                                </div>`;
+
+            // 绑定弹出窗口到标记
+            marker.bindPopup(popupContent);
+
+            // 存储标记到打卡点数据中，以便在 moveToLocation 函数中使用
+            checkpoint.marker = marker;
+        });
+    } else {
+        alert('未找到在多边形区域内的打卡点');
+    }
+}
+
+// 页面加载时调用
+document.addEventListener('DOMContentLoaded', function() {
+    fetchAllPosts();
+    Selections(); 
+
+});
+
+</script>
+
+</body>
+</html>

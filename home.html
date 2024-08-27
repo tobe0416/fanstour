@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Collection</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #FFD8A6;
+            padding: 20px 20px;
+            box-sizing: border-box;
+            border-bottom: 1px solid #ddd;
+        }
+        .header .back {
+            font-size: 16px;
+            color: black;
+            cursor: pointer;
+        }
+        .header .user-info {
+            display: flex;
+            align-items: center;
+        }
+        .header .user-info img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+            border: 2px solid #000;
+            object-fit: cover;
+        }
+        .header .user-info .name {
+            font-weight: bold;
+        }
+        .header .edit {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        .content {
+            display: flex;
+            padding: 20px;
+            flex: 1;
+            box-sizing: border-box;
+        }
+        .sidebar {
+            width: 250px;
+            padding: 20px;
+            background-color: #f7f7f7;
+            border-right: 1px solid #ddd;
+            box-sizing: border-box;
+            border-radius: 10px;
+        }
+        .sidebar h3 {
+            margin-top: 0;
+            color: gray;
+        }
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+        .sidebar ul li {
+            padding: 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+            cursor: pointer;
+        }
+        .sidebar ul li .label {
+            display: flex;
+            align-items: center;
+        }
+        .sidebar ul li .label i {
+            margin-right: 10px;
+        }
+        .sidebar ul li .arrow {
+            font-size: 16px;
+            visibility: hidden;
+        }
+        .sidebar ul li.active .arrow {
+            visibility: visible;
+        }
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            box-sizing: border-box;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            margin-left: 20px;
+            overflow-y: auto;
+            background-color: #ffffff;
+        }
+        .post {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            background-color: #fafafa;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .post h3 {
+            font-size: 18px;
+            font-weight: normal;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .post p {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        .post img {
+            width: 100%;
+            max-width: 300px;
+            height: auto;
+            margin-right: 10px;
+            border-radius: 5px;
+        }
+        .action-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+        .action-buttons button {
+            padding: 5px 10px;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: black;
+            color: white;
+            margin-right: 5px;
+        }
+        .action-buttons button:hover {
+            background-color: #fc734a;
+        }
+
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); /* 调整minmax的最小值减少图片大小 */
+            gap: 5px; /* 减小图片之间的间距 */
+            margin-top: 10px;
+        }
+
+        .place-image {
+            width: 100%;
+            height: 120px; /* 限制图片高度，保持统一 */
+            border-radius: 5px;
+            object-fit: cover;
+        }
+         /* New button styling */
+         .navigate-button {
+            display: block;
+            width: 80%;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background-color: #FFD8A6;
+            color: #333;
+            text-align: center;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="back" onclick="goBack()">&lt; BACK</div>
+        <div class="user-info">
+            <img src="image/default-profile.png" alt="User Profile" id="profileImage">
+            <div class="name" id="userName">NAME</div>
+        </div>
+        <div class="edit" onclick="openModal()">
+            修改个人信息&nbsp;<i class="fas fa-pencil-alt"></i>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="sidebar">
+            <h3>My Collection</h3>
+            <ul>
+                <li class="active" onclick="fetchContent('favoritePosts', this)">
+                    <div class="label">
+                        <i class="fas fa-star"></i>
+                        我收藏的帖子
+                    </div>
+                    <div class="arrow">→</div>
+                </li>
+                <li onclick="fetchContent('favoritePlaces', this)">
+                    <div class="label">
+                        <i class="fas fa-map-marker-alt"></i>
+                        我收藏的地点
+                    </div>
+                    <div class="arrow">→</div>
+                </li>
+                <li onclick="fetchContent('likedPosts', this)">
+                    <div class="label">
+                        <i class="fas fa-thumbs-up"></i>
+                        我赞过的帖子
+                    </div>
+                    <div class="arrow">→</div>
+                </li>
+                <li onclick="fetchContent('myPosts', this)">
+                    <div class="label">
+                        <i class="fas fa-edit"></i>
+                        我发布的帖子
+                    </div>
+                    <div class="arrow">→</div>
+                </li>
+            </ul>
+            <a href="route.html" class="navigate-button">路径规划</a>
+        </div>
+        
+        <div class="main-content" id="main-content">
+            
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (user) {
+                document.getElementById('profileImage').src = user.profile_photo;
+                document.getElementById('userName').innerText = user.user_name;
+            }
+            fetchContent('favoritePosts', document.querySelector('.sidebar ul li.active'));
+        });
+
+        function goBack() {
+            window.history.back();
+        }
+        //获取数据
+        function fetchContent(contentType, element) {
+            const items = document.querySelectorAll('.sidebar ul li');
+            items.forEach(item => item.classList.remove('active'));
+            element.classList.add('active');
+
+            const mainContent = document.getElementById('main-content');
+            const user = JSON.parse(localStorage.getItem('user'));
+
+            if (!user) {
+                console.error('User information not found in localStorage.');
+                mainContent.innerHTML = '<p>无法获取用户信息，请登录。</p>';
+                return;
+            }
+
+            const userId = user.user_id;
+            
+            if (!userId) {
+                console.error('User ID not found.');
+                return;
+            }
+
+            const baseUrl = 'http://localhost:4000';
+            let url;
+            switch (contentType) {
+                case 'favoritePosts':
+                    url = `${baseUrl}/favoritePosts/${userId}`;
+                    break;
+                case 'favoritePlaces':
+                    url = `${baseUrl}/favoritePlaces/${userId}`;
+                    break;
+                case 'likedPosts':
+                    url = `${baseUrl}/likedPosts/${userId}`;
+                    break;
+                case 'myPosts':
+                    url = `${baseUrl}/myPosts/${userId}`;
+                    break;
+                default:
+                    console.error('Invalid contentType:', contentType);
+                    mainContent.innerHTML = '<h2>默认内容</h2><p>请选择一个选项以查看内容。</p>';
+                    return;
+            }
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.code === 1) {
+                        displayContent(data.data, contentType);
+                    } else {
+                        mainContent.innerHTML = '<p>无法获取数据，请稍后再试。</p>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                    mainContent.innerHTML = '<p>服务器错误，请稍后再试。</p>';
+                });
+        }
+        //展示内容
+        function displayContent(data, contentType) {
+            const mainContent = document.getElementById('main-content');
+            let html = '';
+
+            switch (contentType) {
+                case 'favoritePosts':
+                    html += '<h2>我收藏的帖子</h2>';
+                    data.forEach(post => {
+                        html += createPostHtml(post, '');
+                    });
+                    break;
+
+                    case 'favoritePlaces':
+                        html += '<h2>我收藏的地点</h2>';
+                        data.forEach(place => {
+                            html += `<div class="post">
+                                        <h3>${place.name}</h3>
+                                        <p>${place.description}</p>`;
+                            if (place.images && place.images.length > 0) {
+                                html += `<div class="image-grid">`;
+                                place.images.forEach(image => {
+                                    html += `<img src="${image}" alt="Place Image" class="place-image">`;
+                                });
+                                html += `</div>`;
+                            }
+                            html += `<div class="action-buttons">
+                                        <button onclick="unfavoritePlace(${place.checkpoint_id})">取消收藏</button>
+                                    </div>
+                                    </div>`;
+                        });
+                        break;
+
+
+                case 'likedPosts':
+                    html += '<h2>我赞过的帖子</h2>';
+                    data.forEach(post => {
+                        html += createPostHtml(post, '');
+                    });
+                    break;
+                    
+                case 'myPosts':
+                    html += '<h2>我发布的帖子</h2>';
+                    data.forEach(post => {
+                        html += createPostHtml(post, 'deletePost');
+                    });
+                    break;
+
+                default:
+                    html = '<h2>默认内容</h2><p>请选择一个选项以查看内容。</p>';
+                    break;
+            }
+
+            mainContent.innerHTML = html;
+        }
+
+        function createPostHtml(post, action) {
+            let html = `<div class="post">
+                            <h3>${post.content}</h3>
+                            <p>${post.location} - ${new Date(post.publish_time).toLocaleString()}</p>`;
+            if (post.images && post.images.length > 0) {
+                html += `<div class="image-grid">`;
+                post.images.forEach(image => {
+                    html += `<img src="${image}" alt="Post Image" class="place-image">`;
+                });
+                html += `</div>`;
+            }
+
+            if (action === 'deletePost') {
+                html += `<div class="action-buttons">
+                            <button onclick="${action}(${post.post_id})">${getActionLabel(action)}</button>
+                         </div>`;
+            }
+            
+            html += `</div>`;
+            return html;
+        }
+
+        function getActionLabel(action) {
+            switch (action) {
+                case 'unfavoritePlace': return '取消收藏';
+                case 'deletePost': return '删除帖子';
+                default: return '';
+            }
+        }
+
+        function unfavoritePlace(checkpointId) {
+            const user = JSON.parse(localStorage.getItem('user')); // 假设用户信息存储在localStorage中
+            const userId = user ? user.user_id : null;
+
+            if (!userId) {
+                alert('用户未登录，无法取消收藏');
+                return;
+            }
+
+            fetch(`http://localhost:4000/unfavoritePlace/${checkpointId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ userId: userId }) // 将userId传递到请求体中
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.code === 1) {
+                    alert('已取消收藏');
+                    fetchContent('favoritePlaces', document.querySelector('.sidebar ul li.active'));
+                } else {
+                    alert('操作失败');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+
+        function deletePost(postId) {
+            const user = JSON.parse(localStorage.getItem('user')); // 假设用户信息存储在localStorage中
+            const userId = user ? user.user_id : null;
+
+            if (!userId) {
+                alert('用户未登录，无法删除帖子');
+                return;
+            }
+
+            fetch(`http://localhost:4000/deletePost/${postId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ userId: userId }) // 将userId传递到请求体中
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.code === 1) {
+                    alert('帖子已删除');
+                    fetchContent('myPosts', document.querySelector('.sidebar ul li.active'));
+                } else {
+                    alert('操作失败');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+
+    </script>
+</body>
+</html>

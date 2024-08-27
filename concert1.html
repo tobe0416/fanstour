@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>演唱会场馆</title>
+    <style>
+        /* 基础样式设置 */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* 标题样式 */
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        /* 搜索栏样式 */
+        .search-bar {
+            width: 50%;
+            padding: 12px;
+            margin-bottom: 30px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        /* 容器样式 */
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 900px;
+        }
+
+        /* 场馆信息卡片样式 */
+        .box {
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            width: 100%;
+            padding: 20px;
+            position: relative;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        /* 卡片鼠标悬停时的样式 */
+        .box:hover {
+            transform: scale(1.02);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        /* 卡片标题样式 */
+        .box h2 {
+            color: #2f24f1;
+            font-size: 1.8em;
+            margin-bottom: 15px;
+        }
+
+        /* 卡片内段落样式 */
+        .box p {
+            color: #080808;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        /* 链接样式 */
+        .box a {
+            color: #2f24f1;
+            text-decoration: none;
+        }
+
+        /* 链接鼠标悬停时的样式 */
+        .box a:hover {
+            text-decoration: underline;
+        }
+
+        /* 添加按钮样式 */
+        .add-button {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            background-color: #050505;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 36px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        /* 弹窗基础样式 */
+        .modal, .edit-modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        /* 弹窗内容样式 */
+        .modal-content, .edit-modal-content {
+            background-color: #fefefe;
+            margin: 8% auto;
+            padding: 30px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 600px;
+            border-radius: 10px;
+        }
+
+        /* 关闭按钮样式 */
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        /* 关闭按钮鼠标悬停时的样式 */
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* 表单容器中的输入框和文本区域样式 */
+        .form-container input,
+        .form-container textarea {
+            width: calc(100% - 24px);
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        /* 表单容器中的按钮样式 */
+        .form-container button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            background-color: #191a1a;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px; /* 增加按钮与下方内容的间距 */
+        }
+
+        /* 表单按钮鼠标悬停时的样式 */
+        .form-container button:hover {
+            background-color: #101112;
+        }
+
+        /* 添加歌手信息的按钮样式 */
+        .add-singer-button {
+            margin-top: 30px;
+            background-color: #060706;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        /* 删除歌手信息的按钮样式 */
+        .delete-singer-button {
+            background-color: #dc3545;
+            color: white;
+            padding: 6px 10px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        /* 歌手信息小盒子样式 */
+        .singer-box {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 12px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .singer-box input {
+            flex-grow: 1;
+            margin-right: 10px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+
+        /* 场馆安排样式 */
+        .venue-arrangement {
+            text-align: center;
+            margin-bottom: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .venue-arrangement::after {
+            content: '▼'; /* 添加下拉箭头 */
+            font-size: 12px;
+            margin-left: 8px;
+        }
+
+        /* 歌手安排列表样式 */
+        .dropdown {
+            padding: 15px;
+            background-color: #f1f1f1;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .dropdown ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .dropdown ul li {
+            margin-bottom: 8px;
+        }
+
+        /* 操作按钮容器样式 */
+        .action-buttons {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 5px;
+        }
+
+        /* 删除按钮样式 */
+        .delete-button {
+            background-color: rgb(16, 17, 18);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            color: white;
+            font-size: 16px;
+            line-height: 0;
+        }
+
+        /* 编辑按钮样式 */
+        .edit-button {
+            background-color: #080909;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            color: white;
+            font-size: 16px;
+            line-height: 0;
+        }
+
+        .back{
+        font-size: 16px;
+        color: black;
+        cursor: pointer;
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        padding: 5px 10px;
+        border-radius: 5px;
+        z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <h1>演唱会场馆</h1>
+    <!-- 搜索栏 -->
+    <input type="text" class="search-bar" placeholder="搜索歌手、演出时间或地点..." onkeyup="filterVenues()">
+    
+    <!-- 场馆信息的容器 -->
+    <div class="container" id="venue-container">
+        <!-- 动态加载场馆信息 -->
+    </div>
+
+    <!-- 添加场馆信息的按钮 -->
+    <button class="add-button" onclick="openAddModal()">+</button>
+
+    <!-- 添加场馆信息的弹窗 -->
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <div class="form-container">
+                <h2>添加演唱会场馆信息</h2>
+                <input type="text" id="venue-name" placeholder="场馆名称" required>
+                <input type="text" id="venue-location" placeholder="地点" required>
+                
+                <h3>歌手安排</h3>
+                <div id="singer-list">
+                    <!-- 动态添加歌手信息 -->
+                </div>
+                <button class="add-singer-button" onclick="addSingerField()">添加歌手信息</button>
+                
+                <textarea id="venue-more-info" placeholder="更多信息"></textarea>
+                <button onclick="addVenue()">添加场馆</button>
+            </div>
+        </div>
+    </div>
+<!-- 返回 -->
+<div class="back" onclick="goBack()">&lt; BACK</div>
+    <!-- 修改场馆信息的弹窗 -->
+    <div id="editModal" class="edit-modal">
+        <div class="edit-modal-content">
+            <span class="close" onclick="closeEditModal()">&times;</span>
+            <div class="form-container">
+                <h2>修改演唱会场馆信息</h2>
+                <input type="hidden" id="edit-id">
+                <input type="text" id="edit-venue-name" placeholder="场馆名称" required>
+                <input type="text" id="edit-venue-location" placeholder="地点" required>
+                
+                <h3>歌手安排</h3>
+                <div id="edit-singer-list">
+                    <!-- 动态添加歌手信息 -->
+                </div>
+                <button class="add-singer-button" onclick="addEditSingerField()">添加歌手信息</button>
+                
+                <textarea id="edit-venue-more-info" placeholder="更多信息"></textarea>
+                <button onclick="updateVenue()">更新场馆</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+       //返回
+       function goBack() {
+    window.location.href = 'index.html';
+    }
+        // 搜索功能，根据用户输入动态过滤场馆信息
+        function filterVenues() {
+            const searchTerm = document.querySelector('.search-bar').value.toLowerCase();
+            const boxes = document.querySelectorAll('.box');
+            boxes.forEach(box => {
+                const venue = box.getAttribute('data-venue').toLowerCase();
+                const schedule = box.getAttribute('data-schedule').toLowerCase();
+                if (venue.includes(searchTerm) || schedule.includes(searchTerm)) {
+                    box.style.display = 'block';
+                } else {
+                    box.style.display = 'none';
+                }
+            });
+        }
+
+        // 动态添加歌手信息输入框
+        function addSingerField() {
+            const singerList = document.getElementById('singer-list');
+            const singerDiv = document.createElement('div');
+            singerDiv.className = 'singer-box';
+            singerDiv.innerHTML = `
+                <input type="text" placeholder="歌手姓名" required>
+                <input type="text" placeholder="演唱会日期" required>
+                <button class="delete-singer-button" onclick="removeSingerField(this)">-</button>
+            `;
+            singerList.appendChild(singerDiv);
+        }
+
+        // 动态删除歌手信息输入框
+        function removeSingerField(button) {
+            const singerDiv = button.parentElement;
+            singerDiv.remove();
+        }
+
+        // 打开添加场馆信息的弹窗
+        function openAddModal() {
+            document.getElementById('myModal').style.display = 'block';
+        }
+
+        // 关闭添加场馆信息的弹窗
+        function closeModal() {
+            document.getElementById('myModal').style.display = 'none';
+        }
+
+        // 动态添加编辑时的歌手信息输入框
+        function addEditSingerField() {
+            const singerList = document.getElementById('edit-singer-list');
+            const singerDiv = document.createElement('div');
+            singerDiv.className = 'singer-box';
+            singerDiv.innerHTML = `
+                <input type="text" placeholder="歌手姓名" required>
+                <input type="text" placeholder="演唱会日期" required>
+                <button class="delete-singer-button" onclick="removeSingerField(this)">-</button>
+            `;
+            singerList.appendChild(singerDiv);
+        }
+
+        // 打开编辑场馆信息的弹窗，并填充已有的信息
+        function openEditModal(id, name, location, schedule, moreInfo) {
+            document.getElementById('edit-id').value = id;
+            document.getElementById('edit-venue-name').value = name;
+            document.getElementById('edit-venue-location').value = location;
+
+            const singerList = document.getElementById('edit-singer-list');
+            singerList.innerHTML = ''; // 清空现有歌手信息
+            const singers = schedule.split(',').map(item => item.trim().split(' - '));
+            singers.forEach(singer => {
+                addEditSingerField();
+                const lastDiv = singerList.lastElementChild;
+                lastDiv.querySelector('input[type="text"]:nth-child(1)').value = singer[0];
+                lastDiv.querySelector('input[type="text"]:nth-child(2)').value = singer[1];
+            });
+
+            document.getElementById('edit-venue-more-info').value = moreInfo;
+            document.getElementById('editModal').style.display = 'block';
+        }
+
+        // 关闭编辑场馆信息的弹窗
+        function closeEditModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+
+        // 添加场馆信息到数据库
+        async function addVenue() {
+            const venueName = document.getElementById('venue-name').value;
+            const venueLocation = document.getElementById('venue-location').value;
+            const singerFields = document.getElementById('singer-list').children;
+            const venueMoreInfo = document.getElementById('venue-more-info').value;
+
+            if (!venueName || !venueLocation || singerFields.length === 0) {
+                alert('请填写所有必填字段！');
+                return;
+            }
+
+            let schedule = [];
+            for (let i = 0; i < singerFields.length; i++) {
+                const singerName = singerFields[i].querySelector('input[type="text"]:nth-child(1)').value;
+                const concertDate = singerFields[i].querySelector('input[type="text"]:nth-child(2)').value;
+                schedule.push(`${singerName} - ${concertDate}`);
+            }
+
+            const venue = {
+                name: venueName,
+                location: venueLocation,
+                schedule: schedule.join(', '),
+                moreInfo: venueMoreInfo
+            };
+
+            try {
+                const response = await fetch('http://localhost:4000/api/venues', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(venue)
+                });
+                if (response.ok) {
+                    alert('场馆添加成功');
+                    closeModal();
+                    fetchVenuesFromDatabase(); // 刷新场馆列表
+                } else {
+                    alert('添加场馆失败');
+                }
+            } catch (error) {
+                console.error('Error adding venue:', error);
+            }
+        }
+
+        // 更新场馆信息到数据库
+        async function updateVenue() {
+            const id = document.getElementById('edit-id').value;
+            const venueName = document.getElementById('edit-venue-name').value;
+            const venueLocation = document.getElementById('edit-venue-location').value;
+            const singerFields = document.getElementById('edit-singer-list').children;
+            const venueMoreInfo = document.getElementById('edit-venue-more-info').value;
+
+            let schedule = [];
+            for (let i = 0; i < singerFields.length; i++) {
+                const singerName = singerFields[i].querySelector('input[type="text"]:nth-child(1)').value;
+                const concertDate = singerFields[i].querySelector('input[type="text"]:nth-child(2)').value;
+                schedule.push(`${singerName} - ${concertDate}`);
+            }
+
+            const venue = {
+                name: venueName,
+                location: venueLocation,
+                schedule: schedule.join(', '),
+                moreInfo: venueMoreInfo
+            };
+
+            try {
+                const response = await fetch(`http://localhost:4000/api/venues/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(venue)
+                });
+                if (response.ok) {
+                    alert('场馆信息更新成功');
+                    closeEditModal();
+                    fetchVenuesFromDatabase(); // 刷新场馆列表
+                } else {
+                    alert('更新场馆信息失败');
+                }
+            } catch (error) {
+                console.error('Error updating venue:', error);
+            }
+        }
+
+        // 删除场馆信息
+        async function deleteVenue(id) {
+            if (confirm('确定删除该场馆信息吗？')) {
+                try {
+                    const response = await fetch(`http://localhost:4000/api/venues/${id}`, {
+                        method: 'DELETE'
+                    });
+                    if (response.ok) {
+                        alert('场馆信息删除成功');
+                        fetchVenuesFromDatabase(); // 刷新场馆列表
+                    } else {
+                        alert('删除场馆信息失败');
+                    }
+                } catch (error) {
+                    console.error('Error deleting venue:', error);
+                }
+            }
+        }
+
+        // 从数据库中获取场馆信息并渲染到页面上
+        async function fetchVenuesFromDatabase() {
+            try {
+                const response = await fetch('http://localhost:4000/api/venues');
+                const venues = await response.json();
+                const venueContainer = document.getElementById('venue-container');
+                venueContainer.innerHTML = '';
+
+                venues.forEach(venue => {
+                    const newBox = document.createElement('div');
+                    newBox.className = 'box';
+                    newBox.setAttribute('data-venue', venue.name);
+                    newBox.setAttribute('data-schedule', venue.schedule);
+
+                    newBox.innerHTML = `
+                        <h2>${venue.name}</h2>
+                        <p>地点: <a href="javascript:void(0);" onclick="openBaiduMap('${venue.location}')">${venue.location}</a></p>
+                        <div class="venue-arrangement" onclick="toggleDropdown(this)">场馆安排</div>
+                        <div class="dropdown">
+                            <ul>${venue.schedule.split(',').map(event => `<li>${event.trim()}</li>`).join('')}</ul>
+                        </div>
+                        <p class="more-info" style="display:none">${venue.moreInfo}</p>
+                        <p class="show-more" onclick="toggleMoreInfo(this)">场馆其他信息</p>
+                        <div class="action-buttons">
+                            <button class="delete-button" onclick="deleteVenue(${venue.id})">&times;</button>
+                            <button class="edit-button" onclick="openEditModal(${venue.id}, '${venue.name}', '${venue.location}', '${venue.schedule}', '${venue.moreInfo}')">✎</button>
+                        </div>
+                    `;
+
+                    venueContainer.appendChild(newBox);
+                });
+            } catch (error) {
+                console.error('Error fetching venues:', error);
+            }
+        }
+
+        // 打开百度地图窗口并定位到指定地点
+        function openBaiduMap(location) {
+            const mapUrl = `map.html?location=${encodeURIComponent(location)}`;
+            window.open(mapUrl, '_blank', 'width=800,height=600');
+        }
+
+        // 显示/隐藏更多信息
+        function toggleMoreInfo(element) {
+            const moreInfo = element.previousElementSibling;
+            if (moreInfo.style.display === 'none') {
+                moreInfo.style.display = 'block';
+                element.textContent = '收起其他信息';
+            } else {
+                moreInfo.style.display = 'none';
+                element.textContent = '场馆其他信息';
+            }
+        }
+
+        // 展开/隐藏歌手安排列表
+        function toggleDropdown(element) {
+            const dropdown = element.nextElementSibling;
+            dropdown.style.display = dropdown.style.display === 'none' || dropdown.style.display === '' ? 'block' : 'none';
+        }
+
+        // 页面加载时从数据库获取并显示场馆信息
+        fetchVenuesFromDatabase();
+
+        // 点击弹窗外部区域时关闭弹窗
+        window.onclick = function(event) {
+            const modal = document.getElementById('myModal');
+            const editModal = document.getElementById('editModal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+            if (event.target == editModal) {
+                editModal.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>More Artists</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-image: url("image/background.jpg");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        .header {
+            background-color: #ADD8E6;
+            padding: 20px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header .user-info {
+            display: flex;
+            align-items: center;
+        }
+        .header .user-info img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+            object-fit: cover;
+        }
+        .header .auth-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .header .auth-buttons button {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 14px;
+            background-color: white;
+            color: black;
+        }
+        .container {
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin: 20px;
+        }
+        .section-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .community-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .community-item {
+            width: calc(25% - 20px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        .community-item img {
+            border-radius: 50%;
+            width: 100px;
+            height: 100px;
+            transition: transform 0.3s ease;
+        }
+        .community-item img:hover {
+            transform: translateY(-10px);
+        }
+        .community-item p {
+            margin-top: 10px;
+        }
+        .mail-to {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            border-radius: 15px;
+        }
+        .mail-to a {
+            color: black;
+            text-decoration: none;
+            font-size: 16px;
+        }
+        .back {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            font-size: 16px;
+            color: black;
+            cursor: pointer;
+            padding: 10px 15px;
+            border-radius: 15px;
+        }
+        
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="user-info" id="userInfoContainer">
+            <img src="image/default-profile.png" alt="User Profile" id="profileImage">
+            <span id="userInfo">未登录</span>
+        </div>
+        <div class="auth-buttons">
+            <a href="login.html" id="loginButton"><button class="login">Login</button></a>
+            <a href="register.html" id="registerButton"><button class="register">Register</button></a>
+            <button id="signOutButton" style="display: none;">Sign Out</button>
+        </div>
+    </div>
+    <div class="container">
+        <div class="section-title">更多艺人</div>
+        <div class="community-grid">
+            <div class="community-item">
+                <img src="image/idol/RedVelvet.jpg" alt="RED VELVET">
+                <p>RED VELVET</p>
+            </div>
+            <div class="community-item">
+                <img src="image/idol/AESPA.jpg" alt="AESPA">
+                <p>AESPA</p>
+            </div>
+            <div class="community-item">
+                <img src="image/idol/BABYMONSTER.jpg" alt="BABYMONSTER">
+                <p>BABYMONSTER</p>
+            </div>
+            <div class="community-item">
+                <img src="image/idol/NMIXX.jpg" alt="NMIXX">
+                <p>NMIXX</p>
+            </div>
+            <div class="community-item">
+                <img src="image/idol/KISS OF LIFE.jpg" alt="KISS OF LIFE">
+                <p>KISS OF LIFE</p>
+            </div>
+            <div class="community-item">
+                <img src="image/idol/NEW JEANS.jpg" alt="NEW JEANS">
+                <p>NEW JEANS</p>
+            </div>
+            
+            <div class="community-item">
+                <img src="image/idol/LE_SSERAFIM.jpg" alt="LE SSERAFIM">
+                <p>LE SSERAFIM</p>
+            </div>
+            
+            <div class="community-item">
+                <img src="image/idol/SEVENTEEN.jpg" alt="SEVENTEEN">
+                <p>SEVENTEEN</p>
+            </div>
+            <div class="community-item">
+                <img src="image/idol/STRAYKIDS.jpg" alt="STRAY KIDS">
+                <p>STRAY KIDS</p>
+            </div>
+            <div class="community-item">
+                <img src="image/idol/TXT.jpg" alt="TXT">
+                <p>TXT</p>
+            </div>
+            <div class="community-item">
+                <img src="image/idol/ENHYPEN.jpg" alt="ENHYPEN">
+                <p>ENHYPEN</p>
+            </div>
+            <div class="community-item">
+                <img src="image/idol/ZB1.jpg" alt="ZB1">
+                <p>ZB1</p>
+            </div>
+            
+        </div>
+    </div>
+    <div class="mail-to">
+        <a href="mailto:1145537155@qq.com?subject=Artist Not Found">暂未找到，mail to us</a>
+    </div>
+    <div class="back" onclick="goBack()">&lt; BACK</div>
+
+    <script>
+        function goBack() {
+            window.location.href = 'index.html';
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (user) {
+                document.getElementById('profileImage').src = user.profile_photo;
+                document.getElementById('userInfo').innerHTML = user.user_name + "<br>" + "ID:" + user.user_id;
+                document.getElementById('loginButton').style.display = 'none';
+                document.getElementById('registerButton').style.display = 'none';
+                document.getElementById('signOutButton').style.display = 'block';
+            }
+            document.getElementById('signOutButton').addEventListener('click', function() {
+                localStorage.removeItem('user');
+                window.location.href = 'login.html';
+            });
+            document.getElementById('userInfoContainer').addEventListener('click', function() {
+                window.location.href = 'home.html';
+            });
+        });
+    </script>
+</body>
+</html>

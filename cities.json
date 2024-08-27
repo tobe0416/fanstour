@@ -1,0 +1,34 @@
+{
+    "China": {
+        "latitude": 35.8617,
+        "longitude": 104.1954,
+        "cities": {
+            "Hong Kong": [22.3193, 114.1694]
+        }
+    },
+    "Korea": {
+        "latitude": 35.9078,
+        "longitude": 127.7669,
+        "cities": {
+            "Seoul": [37.5665, 126.9780],
+            "Jeju": [33.4996, 126.5312]
+        }
+    },
+    "Japan": {
+        "latitude": 36.2048,
+        "longitude": 138.2529,
+        "cities": {
+            "Tokyo": [35.6824, 139.7590],
+            "Osaka": [34.6937, 135.5023]
+        }
+    },
+    "Portugal": {
+        "latitude": 39.3999,
+        "longitude": -8.2245,
+        "cities": {
+            "Lisbon": [38.7223, -9.1393]
+        }
+    }
+
+}
+

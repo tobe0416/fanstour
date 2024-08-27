@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-image: url("image/background.jpg");
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+        }
+        .header {
+            background-color: #ADD8E6;
+            padding: 20px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header .user-info {
+            display: flex;
+            align-items: center;
+        }
+        .header .user-info img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+            object-fit: cover; /* 使图像保持比例并填充容器 */
+            cursor: pointer;
+        }
+        .header .auth-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .header .auth-buttons button {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 14px;
+            background-color: white;
+            color: black;
+        }
+        .container {
+            display: flex;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin: 20px;
+            margin-top: 50px;
+        }
+        .community-section, .concert-section {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin: 10px;
+        }
+        .community-section {
+            flex: 2;
+            margin-right: 20px;
+        }
+        .concert-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .section-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .community-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .community-item {
+            width: calc(33.333% - 20px);/* 每个项目的宽度为容器的33.333%减去20像素的间距 */
+            display: flex; /* 使用flexbox布局，以便子元素可以按列对齐 */
+            flex-direction: column; /* 子元素按列（垂直）方向排列 */
+            align-items: center; /* 子元素（如图片和文本）在水平方向居中对齐 */
+            text-align: center; /* 文本在容器内部居中对齐 */
+            margin-bottom: 30px;
+        }
+        .community-item img {
+            border-radius: 50%;
+            width: 100px;
+            height: 100px;
+            transition: transform 0.3s ease; /* 动画持续时间 */
+        }
+        .community-item img:hover {
+            transform: translateY(-10px); /* 鼠标悬浮时图片上浮 */
+        }
+        .community-item p {
+            margin-top: 10px;
+        }
+        a{
+        color: black;
+        text-decoration: none !important;
+    }
+    
+        .concert-image {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .concert-image img {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+            transition: transform 0.3s ease; /* 动画持续时间 */
+        }
+        .concert-image img:hover {
+            transform: translateY(-10px); /* 鼠标悬浮时图片上浮 */
+        }
+
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="user-info" id="userInfoContainer">
+            <img src="image/default-profile.png" alt="User Profile" id="profileImage">
+            <span id="userInfo">未登录</span>
+        </div>
+        <div class="auth-buttons">
+            <a href="login.html" id="loginButton"><button class="login">Login</button></a>
+            <a href="register.html" id="registerButton"><button class="register">Register</button></a>
+            <button id="signOutButton" style="display: none;">Sign Out</button>
+        </div>
+    </div>
+    <div class="container">
+        <div class="community-section">
+            <div class="section-title">进入社区</div>
+            <div class="community-grid">
+                <div class="community-item">
+                    <a href="post1.html"><img src="image/idol/RIIZE.jpg" alt="RIIZE"></a>
+                    <p>RIIZE</p>
+                </div>
+                <div class="community-item">
+                    <img src="image/idol/NCT127.jpg" alt="NCT 127">
+                    <p>NCT 127</p>
+                </div>
+                <div class="community-item">
+                    <img src="image/idol/NCTDREAM.jpg" alt="NCT DREAM">
+                    <p>NCT DREAM</p>
+                </div>
+                <div class="community-item">
+                    <img src="image/idol/EXO.jpg" alt="EXO">
+                    <p>EXO</p>
+                </div>
+                <div class="community-item">
+                    <img src="image/idol/NCTWISH.JPG" alt="Red Velvet">
+                    <p>NCT WISH</p>
+                </div>
+                
+                <div class="community-item">
+                    <a href="moreArtists.html">
+                        <div style="display: flex; align-items: center; justify-content: center; width: 100px; height: 100px; background-color: #f0f0f0; border-radius: 50%;">
+                        <span>查看更多...</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="concert-section">
+            <div class="section-title">演唱会板块</div>
+            <div class="concert-image">
+                <a href="concert1.html"><img src="image/concert.jpg" alt="Concert"></a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 检查本地存储中的用户信息
+        document.addEventListener('DOMContentLoaded', function() {
+            const user = JSON.parse(localStorage.getItem('user'));//从本地获取user 赋值给局部变量
+            if (user) {
+                document.getElementById('profileImage').src = user.profile_photo;
+                document.getElementById('userInfo').innerHTML = user.user_name + "<br>" + "ID:" + user.user_id;
+                //隐藏登录和注册按钮，显示登出按钮
+                document.getElementById('loginButton').style.display = 'none';
+                document.getElementById('registerButton').style.display = 'none';
+                document.getElementById('signOutButton').style.display = 'block';
+            }
+            //登出
+            document.getElementById('signOutButton').addEventListener('click', function() {
+                localStorage.removeItem('user');
+                window.location.href = 'login.html';
+            });
+             // 添加点击头像跳转到home.html的事件监听器
+             document.getElementById('userInfoContainer').addEventListener('click', function() {
+                window.location.href = 'home.html';
+            });
+        });
+
+    </script>
+</body>
+</html>
