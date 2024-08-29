@@ -122,7 +122,22 @@
         .concert-image img:hover {
             transform: translateY(-10px); /* 鼠标悬浮时图片上浮 */
         }
-
+        .mail-to {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            border-radius: 15px;
+        }
+        .mail-to a {
+            color: black;
+            text-decoration: none;
+            font-size: 16px;
+        }
+        #slogan{
+            /* font-size: 20px; */
+            font-family:sans-serif;
+        }
     </style>
 </head>
 <body>
@@ -130,6 +145,11 @@
         <div class="user-info" id="userInfoContainer">
             <img src="image/default-profile.png" alt="User Profile" id="profileImage">
             <span id="userInfo">未登录</span>
+        </div>
+        <div>
+            <p id="slogan">
+                Descend to UTOPIA ✨
+            </p>
         </div>
         <div class="auth-buttons">
             <a href="login.html" id="loginButton"><button class="login">Login</button></a>
@@ -178,7 +198,9 @@
             </div>
         </div>
     </div>
-
+    <div class="mail-to">
+        <a href="mailto:1145537155@qq.com?subject=Artist Not Found">反馈问题？ mail to us</a>
+    </div>
     <script>
         // 检查本地存储中的用户信息
         document.addEventListener('DOMContentLoaded', function() {

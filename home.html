@@ -176,6 +176,85 @@
             text-decoration: none;
             font-weight: bold;
         }
+        /* 弹出窗口样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 400px;
+            text-align: center;
+            position: relative;
+        }
+        .close {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 25px;
+            cursor: pointer;
+        }
+        .profile-pic {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-color: #ddd;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto 20px;
+            font-size: 50px;
+            color: white;
+            cursor: pointer;
+            position: relative;
+            background-size: cover;
+            background-position: center;
+        }
+        .profile-pic input[type="file"] {
+            opacity: 0;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+        .upload-text {
+            color: blue;
+            cursor: pointer;
+        }
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        .submit-button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: black;
+            color: white;
+            cursor: pointer;
+            width: 100%;
+        }
     </style>
 </head>
 <body>
@@ -228,6 +307,24 @@
         
         <div class="main-content" id="main-content">
             
+        </div>
+    </div>
+    <!-- 修改个人信息的弹出窗口 -->
+    <div id="profileModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h3>修改个人信息</h3>
+            <div class="profile-pic" id="profilePic">
+                <input type="file" accept="image/*" id="upload-avatar">
+            </div>
+            <div class="upload-text">上传头像</div>
+            <form id="updateForm">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username">
+                </div>
+                <button type="submit" class="submit-button">确认修改</button>
+            </form>
         </div>
     </div>
 
@@ -444,6 +541,81 @@
             .catch(error => console.error('Error:', error));
         }
 
+        //修改个人信息
+        let selectedFile;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (user) {
+                document.getElementById('profileImage').src = user.profile_photo;
+                document.getElementById('userName').innerText = user.user_name;
+                document.getElementById('profilePic').style.backgroundImage = `url(${user.profile_photo})`;
+                document.getElementById('username').value = user.user_name;
+            }
+        });
+        function openModal() {
+            document.getElementById('profileModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('profileModal').style.display = 'none';
+        }
+
+        document.querySelector('.profile-pic input').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                selectedFile = file;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.querySelector('.profile-pic').style.backgroundImage = `url(${e.target.result})`;
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        document.getElementById('updateForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const user = JSON.parse(localStorage.getItem('user'));
+            const newUserName = document.getElementById('username').value;
+
+            if (!newUserName) {
+                alert('用户名不能为空');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('user_id', user.user_id);
+            formData.append('user_name', newUserName);
+            if (selectedFile) {
+                formData.append('profile_photo', selectedFile);
+            }
+
+            fetch('http://localhost:4000/updateProfile', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.code === 1) {
+                    alert('用户信息更新成功');
+                    user.user_name = newUserName;
+                    if (selectedFile && data.profile_photo) {
+                        user.profile_photo = data.profile_photo;
+                    }
+                    localStorage.setItem('user', JSON.stringify(user));
+                    document.getElementById('profileImage').src = user.profile_photo;
+                    document.getElementById('userName').innerText = user.user_name;
+                    closeModal();
+                } else {
+                    alert(data.msg);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('用户信息更新时出错');
+            });
+        });
 
     </script>
 </body>

@@ -684,6 +684,10 @@ function moveToLocation(lat, lng, checkpointId) {
             filteredCheckpoints.forEach(checkpoint => {
                 const checkpointElement = document.createElement('div');
                 checkpointElement.className = 'checkpoint-item'; // 为元素添加样式类
+                 // 判断当前用户是否已收藏此打卡点
+                 const isFavorite = currentUser && currentUser.favorites && currentUser.favorites.includes(checkpoint.checkpoint_id);
+                // 如果已收藏，则星星图标为实心；否则为空心
+                const starClass = isFavorite ? 'fas fa-star' : 'far fa-star';
                 // 生成 Bootstrap Carousel 结构
                 let carouselHTML = '';
                 if (checkpoint.images && checkpoint.images.length > 0) {
@@ -717,7 +721,7 @@ function moveToLocation(lat, lng, checkpointId) {
                     </div>
                     <div class="buttons">
                         <button class="star-button" onclick="toggleFavorite(${checkpoint.checkpoint_id}, this)">
-                            <i class="far fa-star"></i>
+                            <i class="${starClass} fa-star"></i>
                         </button>
                         <button class="marker-button" onclick="moveToLocation(${checkpoint.latitude}, ${checkpoint.longitude}, ${checkpoint.checkpoint_id})"> <!-- 定位按钮 -->
                             <i class="fa-solid fa-location-dot location-icon"></i>
@@ -998,7 +1002,10 @@ function performSearchWithinPolygon(polygon) {
         filteredCheckpoints.forEach(checkpoint => {
             const checkpointElement = document.createElement('div');
             checkpointElement.className = 'checkpoint-item'; // 为元素添加样式类
-            
+             // 判断当前用户是否已收藏此打卡点
+             const isFavorite = currentUser && currentUser.favorites && currentUser.favorites.includes(checkpoint.checkpoint_id);
+                // 如果已收藏，则星星图标为实心；否则为空心
+                const starClass = isFavorite ? 'fas fa-star' : 'far fa-star';
             // 生成 Bootstrap Carousel 结构
             let carouselHTML = '';
             if (checkpoint.images && checkpoint.images.length > 0) {
@@ -1033,7 +1040,7 @@ function performSearchWithinPolygon(polygon) {
                 </div>
                 <div class="buttons">
                     <button class="star-button" onclick="toggleFavorite(${checkpoint.checkpoint_id}, this)">
-                        <i class="far fa-star"></i>
+                         <i class="${starClass} fa-star"></i>
                     </button>
                     <button class="marker-button" onclick="moveToLocation(${checkpoint.latitude}, ${checkpoint.longitude}, ${checkpoint.checkpoint_id})"> <!-- 定位按钮 -->
                         <i class="fa-solid fa-location-dot location-icon"></i>

@@ -978,44 +978,42 @@ app.post('/api/posts/like', (req, res) => {
                     return res.status(500).json({ success: false, message: 'Server error' });
                 }
 
-                //更新打卡点likes_count
+                // 获取 checkpoint_id 并更新 checkpoint 的 likes_count
                 const getCheckpointIdQuery = 'SELECT checkpoint_id FROM posts WHERE post_id = ?';
-                    db.query(getCheckpointIdQuery, [post_id], (err, result) => {
-                        if (err) {
-                            console.error('Error retrieving checkpoint_id:', err);
-                            return res.status(500).json({ success: false, message: 'Server error' });
-                        }
-
-                        const checkpoint_id = result[0].checkpoint_id;
-
-                        // 继续后续的更新逻辑
-                        const updateCheckpointQuery = 'UPDATE checkpoints SET likes_count = likes_count + 1 WHERE checkpoint_id = ?';
-                        db.query(updateCheckpointQuery, [checkpoint_id], (err, updateResult) => {
-                            if (err) {
-                                console.error('Error updating checkpoint likes count:', err);
-                                return res.status(500).json({ success: false, message: 'Server error' });
-                            }
-
-                            // 继续处理其他逻辑或返回响应
-                            res.status(200).json({ success: true, message: 'Liked successfully.' });
-                        });
-                    });
-
-                const getLikesCountQuery = 'SELECT likes_count FROM posts WHERE post_id = ?';
-                db.query(getLikesCountQuery, [post_id], (err, likesResult) => {
+                db.query(getCheckpointIdQuery, [post_id], (err, checkpointResult) => {
                     if (err) {
-                        console.error('Error fetching updated likes count:', err);
+                        console.error('Error retrieving checkpoint_id:', err);
                         return res.status(500).json({ success: false, message: 'Server error' });
                     }
 
-                    const updatedLikesCount = likesResult[0].likes_count;
-                    res.status(200).json({ success: true, message: 'Liked successfully.', likes_count: updatedLikesCount });
+                    const checkpoint_id = checkpointResult[0].checkpoint_id;
+
+                    // 更新 checkpoint 的 likes_count
+                    const updateCheckpointQuery = 'UPDATE checkpoints SET likes_count = likes_count + 1 WHERE checkpoint_id = ?';
+                    db.query(updateCheckpointQuery, [checkpoint_id], (err, checkpointUpdateResult) => {
+                        if (err) {
+                            console.error('Error updating checkpoint likes count:', err);
+                            return res.status(500).json({ success: false, message: 'Server error' });
+                        }
+
+                        // 获取更新后的 likes_count
+                        const getLikesCountQuery = 'SELECT likes_count FROM posts WHERE post_id = ?';
+                        db.query(getLikesCountQuery, [post_id], (err, likesResult) => {
+                            if (err) {
+                                console.error('Error fetching updated likes count:', err);
+                                return res.status(500).json({ success: false, message: 'Server error' });
+                            }
+
+                            const updatedLikesCount = likesResult[0].likes_count;
+                            return res.status(200).json({ success: true, message: 'Liked successfully.', likes_count: updatedLikesCount });
+                        });
+                    });
                 });
             });
         });
     });
 });
-;
+
 
 // 收藏帖子功能
 app.post('/post_favorite', (req, res) => {
