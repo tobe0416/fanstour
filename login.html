@@ -83,7 +83,8 @@
             z-index: 5; /* 确保泡泡在登录框后面 */
             opacity: 0.7; /* 增加一些透明度 */
         }
-
+        
+        /* 随时间推移泡泡的变化 */
         @keyframes float {
             0% { transform: translate(0, 0) scale(1); }
             25% { transform: translate(30px, -50px) scale(1.1); }
@@ -92,7 +93,7 @@
             100% { transform: translate(0, 0) scale(1); }
         }
 
-        /* 为每个泡泡调整位置、大小和动画时长 */
+        /* 每个泡泡初始位置和动画时长 */
         .bubble1 { background-image: url('image/idol/AESPA.JPG'); top: 5%; left: 10%; animation-duration: 12s; }
         .bubble2 { background-image: url('image/idol/BABYMONSTER.JPG'); top: 20%; left: 70%; animation-duration: 14s; }
         .bubble3 { background-image: url('image/idol/ENHYPEN.JPG'); top: 60%; left: 15%; animation-duration: 10s; }

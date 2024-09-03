@@ -118,7 +118,7 @@
             .then(response => response.json())
             .then(data => {
                 if (data.code === 1) {
-                    alert('User registered successfully');
+                    alert('用户注册成功');
                     window.location.href = 'login.html';
                 } else {
                     alert('注册用户时出错: ' + data.msg);

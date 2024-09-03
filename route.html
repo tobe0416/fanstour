@@ -25,7 +25,7 @@
             width: 20%;
             height: 100%;
             float: left;
-            background-color: #f5f5f5;
+            background-color: #ffffff;
             box-shadow: 2px 0px 6px rgba(0, 0, 0, 0.3);
             padding: 20px;
             box-sizing: border-box;
@@ -38,6 +38,7 @@
         }
 
         #placesList {
+            width: 90%;
             max-height: 200px;
             overflow-y: auto;
             margin-bottom: 10px;
@@ -46,13 +47,27 @@
             border: 1px solid #ccc;
         }
 
+        #travelMode {
+            width: 95%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
         #routeDetails {
             max-height: 300px;
             overflow-y: auto;
-            margin-top: 10px;
-            padding: 5px;
+            margin-top: 20px;
+           /* padding: 10px;
             background-color: white;
             border: 1px solid #ccc;
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            width: 280px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3); */
         }
 
         #sidebar .place-item {
@@ -68,9 +83,9 @@
         }
 
         #sidebar button {
-            width: 100%;
+            width: 95%;
             padding: 12px;
-            background-color: #009cf9;
+            background-color: #f3a43d;
             color: white;
             border: none;
             cursor: pointer;
@@ -80,7 +95,7 @@
         }
 
         #startPoint {
-            width: 100%;
+            width: 88%;
             padding: 8px;
             margin-bottom: 10px;
             border: 1px solid #ccc;
@@ -114,7 +129,7 @@
             securityJsCode: "db2ac1369106d4e9eed9abedae8b3b40",
         }
     </script>
-    <script src="https://webapi.amap.com/maps?v=2.0&key=	8f32ef8694e1d12c6290175a95980155&plugin=AMap.Driving,AMap.Walking,AMap.Riding,AMap.Geocoder,AMap.AutoComplete"></script>
+    <script src="https://webapi.amap.com/maps?v=2.0&key=8f32ef8694e1d12c6290175a95980155&plugin=AMap.Driving,AMap.Walking,AMap.Riding,AMap.Geocoder,AMap.AutoComplete"></script>
 </head>
 
 <body>
@@ -134,6 +149,7 @@
         <div id="routeDetails"></div>
     </div>
     <div id="container"></div>
+    <div id="routeDetails"></div>
     <script type="text/javascript">
         document.addEventListener('DOMContentLoaded', function () {
             const user = JSON.parse(localStorage.getItem('user'));
@@ -317,7 +333,10 @@
 
             route.steps.forEach((step, index) => {
                 const stepItem = document.createElement('div');
-                stepItem.innerHTML = `<p>${index + 1}. ${step.instruction}</p>`;
+                stepItem.innerHTML = `
+                    <div>
+                        <i class="step-icon"></i> ${step.instruction}
+                    </div>`;
                 detailsContainer.appendChild(stepItem);
             });
         }

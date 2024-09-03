@@ -431,7 +431,6 @@
                         });
                         break;
 
-
                 case 'likedPosts':
                     html += '<h2>我赞过的帖子</h2>';
                     data.forEach(post => {
@@ -454,6 +453,7 @@
             mainContent.innerHTML = html;
         }
 
+        //展示内容（点赞、收藏、发布帖子）
         function createPostHtml(post, action) {
             let html = `<div class="post">
                             <h3>${post.content}</h3>
@@ -484,6 +484,7 @@
             }
         }
 
+        //取消收藏
         function unfavoritePlace(checkpointId) {
             const user = JSON.parse(localStorage.getItem('user')); // 假设用户信息存储在localStorage中
             const userId = user ? user.user_id : null;
@@ -512,7 +513,7 @@
             .catch(error => console.error('Error:', error));
         }
 
-
+        //删除帖子
         function deletePost(postId) {
             const user = JSON.parse(localStorage.getItem('user')); // 假设用户信息存储在localStorage中
             const userId = user ? user.user_id : null;
@@ -542,8 +543,8 @@
         }
 
         //修改个人信息
-        let selectedFile;
-
+        let selectedFile;//存储头像文件
+        //获取用户当前信息
         document.addEventListener('DOMContentLoaded', function() {
             const user = JSON.parse(localStorage.getItem('user'));
             if (user) {
@@ -560,7 +561,7 @@
         function closeModal() {
             document.getElementById('profileModal').style.display = 'none';
         }
-
+//修改头像
         document.querySelector('.profile-pic input').addEventListener('change', function(event) {
             const file = event.target.files[0];
             if (file) {
@@ -572,7 +573,7 @@
                 reader.readAsDataURL(file);
             }
         });
-
+//确认修改
         document.getElementById('updateForm').addEventListener('submit', function(event) {
             event.preventDefault();
 

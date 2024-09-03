@@ -367,6 +367,7 @@ app.get('/likedPosts/:userId', (req, res) => {
     });
 });
 
+
 // 获取用户收藏的帖子
 app.get('/favoritePosts/:userId', (req, res) => {
     const userId = req.params.userId;
@@ -417,7 +418,7 @@ app.get("/favoritePlaces/:userId", (req, res) => {
         FROM user_favorites uf 
         JOIN checkpoints c ON uf.checkpoint_id = c.checkpoint_id 
         LEFT JOIN checkpoint_images ci ON c.checkpoint_id = ci.checkpoint_id 
-        WHERE uf.user_id = ?
+        WHERE uf.user_id = ?  AND uf.post_id IS NULL
     `;
 
     db.query(sqlStr, [userId], (err, results) => {

@@ -21,6 +21,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            height: 50px;
         }
         .header .user-info {
             display: flex;
@@ -166,19 +167,19 @@
                     <p>RIIZE</p>
                 </div>
                 <div class="community-item">
-                    <img src="image/idol/NCT127.jpg" alt="NCT 127">
+                    <img src="image/idol/NCT127.jpg" alt="NCT 127" onclick="onclick=showAlert()">
                     <p>NCT 127</p>
                 </div>
                 <div class="community-item">
-                    <img src="image/idol/NCTDREAM.jpg" alt="NCT DREAM">
+                    <img src="image/idol/NCTDREAM.jpg" alt="NCT DREAM" onclick="onclick=showAlert()">
                     <p>NCT DREAM</p>
                 </div>
                 <div class="community-item">
-                    <img src="image/idol/EXO.jpg" alt="EXO">
+                    <img src="image/idol/EXO.jpg" alt="EXO" onclick="onclick=showAlert()">
                     <p>EXO</p>
                 </div>
                 <div class="community-item">
-                    <img src="image/idol/NCTWISH.JPG" alt="Red Velvet">
+                    <img src="image/idol/NCTWISH.JPG" alt="NCT WISH" onclick="onclick=showAlert()">
                     <p>NCT WISH</p>
                 </div>
                 
@@ -202,6 +203,9 @@
         <a href="mailto:1145537155@qq.com?subject=Artist Not Found">反馈问题？ mail to us</a>
     </div>
     <script>
+        function showAlert() {
+    alert('暂未开放，敬请期待');
+}
         // 检查本地存储中的用户信息
         document.addEventListener('DOMContentLoaded', function() {
             const user = JSON.parse(localStorage.getItem('user'));//从本地获取user 赋值给局部变量
